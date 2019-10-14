@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: vorticalbox.github.io
+Token: c1daa9c5973276f3c913ede65fe76ffae84d52e0a22365631e02cd9b7702649e
