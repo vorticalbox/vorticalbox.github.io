@@ -7,7 +7,7 @@ categories: nodejs
 
 Been a while since I updated so I though I'll post.
 
-At work i saw quite a few projects importing underscore to use it's .pick function
+At work I saw quite a few projects importing underscore to use it's .pick function
 
 ```
 _.pick({name: 'moe', age: 50, userid: 'moe1'}, 'name', 'age');
