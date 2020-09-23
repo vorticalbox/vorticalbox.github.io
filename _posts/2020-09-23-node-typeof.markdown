@@ -41,7 +41,7 @@ but we can actually get real types from node you just need to know where to look
 
 we can then abstract this in to a function
 
-```typescript
+```js
 export function typeOf(value: any) {
   return Object.prototype.toString.call(value).split(' ')[1].slice(0, -1).toLowerCase();
 }
