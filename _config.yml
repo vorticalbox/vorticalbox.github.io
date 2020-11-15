@@ -23,7 +23,7 @@ email: vorticalbox@protonmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   peronal blog most about programming
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://vorticalbox.githubpages.io" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://vorticalbox.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: vorticalbox
 github_username:  vorticalbox
 
