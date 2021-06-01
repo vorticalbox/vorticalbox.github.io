@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "function Fuzz Buzz"
+title:  "Functional Fuzz Buzz"
 date:   2021-06-01 13:55:00 +0100
 categories: nodejs
 ---
