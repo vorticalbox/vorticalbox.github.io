@@ -5,7 +5,7 @@ date:   2021-06-01 13:55:00 +0100
 categories: nodejs
 ---
 
-So i was reading an article about an interview where they wrote the solution with a NN. Which you can read [here](https://joelgrus.com/2016/05/23/fizz-buzz-in-tensorflow/).
+So I was reading an article about an interview where they wrote the solution with a NN. Which you can read [here](https://joelgrus.com/2016/05/23/fizz-buzz-in-tensorflow/).
 
 I don't have time to look into if this can be done with brain.js so instead here is a function style solution
 
@@ -15,7 +15,7 @@ I don't have time to look into if this can be done with brain.js so instead here
 So the rules of the game are simple, any number divisible by three is replaced by the word fizz and any number divisible by five by the word buzz. Numbers divisible by 15 become fizz buzz. To make it functional I am not allowed to use `if` and no for loops.
 
 
-So as with most of the code I write I will be makign heavy use of `ramda`
+So as with most of the code, I write I will be making heavy use of `ramda`
 
 
 ### Code
@@ -32,9 +32,9 @@ const fizzBuzz = R.pipe(
 )
 ```
 
-so now we have a sinlge function `fizzBuzz` that we can drop any number into and get all the numbers upto and including it. Next on the list is to creat a function that will take a number `n` and return the correct string based on the rules above. I am not allowed to use ifs but likly ramda hs a perfect function called cond `[[(*… → Boolean),(*… → *)]] → (*… → *)`.
+so now we have a single function `fizzBuzz` that we can drop any number into and get all the numbers up to and including it. Next on the list is to create a function that will take a number `n` and return the correct string based on the rules above. I am not allowed to use ifs but likely ramda hs a perfect function called cond `[[(*… → Boolean),(*… → *)]] → (*… → *)`.
 
-This function looks complicated but its rather simple, it takes an array of arrays where the first function should return true/false if it returns true then the second function is called example if the input number is over 80 return a message 'It is over 80' else 'it is not over 80'
+This function looks complicated but it's rather simple, it takes an array of arrays where the first function should return true/false if it returns true then the second function is called example if the input number is over 80 return a message 'It is over 80' else 'it is not over 80'
 
 ```
 const message = R.cond([
@@ -54,7 +54,7 @@ message(2) // 'it is not over 80'
 ```
 
 
-so lets get adding it
+so let's get adding it
 
 ```
 const checkFizzBuzz = R.cond([
@@ -76,8 +76,9 @@ const checkFizzBuzz = R.cond([
   ],
 ]);
 ```
+R.T is simply a function that regardless of input always returns true, this replaces the `() => true` 
 
-next to `loop` over each number and pass it to `checkFizzBuzz` for this we will use a `map` so lets update our pipe to map each number to the function
+next to `loop` over each number and pass it to `checkFizzBuzz` for this we will use a `map` so let's update our pipe to map each number to the function
 
 ```
 const fizzBuzz = R.pipe(
