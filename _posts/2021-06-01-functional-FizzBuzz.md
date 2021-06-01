@@ -32,9 +32,9 @@ const fizzBuzz = R.pipe(
 )
 ```
 
-so now we have a single function `fizzBuzz` that we can drop any number into and get all the numbers up to and including it. Next on the list is to create a function that will take a number `n` and return the correct string based on the rules above. I am not allowed to use ifs but likely ramda hs a perfect function called cond `[[(*… → Boolean),(*… → *)]] → (*… → *)`.
+so now we have a single function `fizzBuzz` that we can drop any number into and get all the numbers up to and including it. Next on the list is to create a function that will take a number `n` and return the correct string based on the rules above. I am not allowed to use ifs but luckily ramda has a perfect function called cond `[[(*… → Boolean),(*… → *)]] → (*… → *)`.
 
-This function looks complicated but it's rather simple, it takes an array of arrays where the first function should return true/false if it returns true then the second function is called example if the input number is over 80 return a message 'It is over 80' else 'it is not over 80'
+This function looks complicated but it's rather simple, it takes an array of arrays where the first function should return true/false if it returns true then the second function is called. Example if the input number is over 80 return a message 'It is over 80' else 'it is not over 80'
 
 ```
 const message = R.cond([
