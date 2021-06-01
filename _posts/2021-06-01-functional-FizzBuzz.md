@@ -7,7 +7,7 @@ categories: nodejs
 
 So I was reading an article about an interview where they wrote the solution with a NN. Which you can read [here](https://joelgrus.com/2016/05/23/fizz-buzz-in-tensorflow/).
 
-I don't have time to look into if this can be done with brain.js so instead here is a function style solution
+I don't have time to look into if this can be done with brain.js so instead here is a functional style solution
 
 
 ### Rules
