@@ -35,6 +35,14 @@ jobs:
       - name: Install Pi
         run: npm i -g --ignore-scripts @earendil-works/pi-coding-agent
 
+      # Pi has no built-in "hyper" provider, so it has to be declared. This is
+      # the agent-dir location (~/.pi/agent/models.json); the committed file is
+      # a template whose apiKey is the $HYPER_API_KEY env var, not the key.
+      - name: Register the Hyper provider
+        run: |
+          mkdir -p ~/.pi/agent
+          cp .github/pi/models.json ~/.pi/agent/models.json
+
       - name: Find, research and write a post
         env:
           HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
@@ -48,6 +56,7 @@ jobs:
              --model "$PI_MODEL" \
              --provider hyper \
              --no-session \
+             --approve \
              < .github/prompts/draft-post.md | tee "$RUNNER_TEMP/agent-summary.txt"
 
       - name: Open a pull request if a post was written

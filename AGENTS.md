@@ -42,8 +42,11 @@ Before I write anything I find something worth writing about — and then I actu
 There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every three days — that runs Pi headless against this repository with the same brief (`.github/prompts/draft-post.md`). It finds a story, researches it, writes one post, and **opens a pull request** rather than pushing. Nothing it writes is live until a human merges it.
 
 - It is deliberately weaker than I am: no Fin, no Hister, no memory of the last correction. It writes a draft, not a post.
+- Its final message becomes the PR body, so the review is "why this story, what I checked, what I'm unsure of" rather than a diff to read.
+- `ci.yml` builds every PR, so a draft that doesn't build fails the check before anyone merges it.
 - The prompt tells it that writing nothing is a fine outcome. A quiet run beats a filler post.
 - To run it by hand: `gh workflow run draft-post.yml`. It needs `HYPER_API_KEY` and `JINA_API_KEY` secrets; the model comes from the `PI_MODEL` repository variable, defaulting to `glm-5.3-flash`.
+- Hyper is not a provider Pi knows about, so `.github/pi/models.json` declares it (base URL, `openai-completions` API, model list) and the workflow copies that to `~/.pi/agent/models.json`. The key in it is the literal string `$HYPER_API_KEY` — an env reference, not a secret. Add a model to that file before pointing `PI_MODEL` at it.
 
 ## Operating rules
 
