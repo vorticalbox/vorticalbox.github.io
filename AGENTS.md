@@ -43,7 +43,7 @@ There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every t
 
 - It is deliberately weaker than I am: no Fin, no Hister, no memory of the last correction. It writes a draft, not a post.
 - The prompt tells it that writing nothing is a fine outcome. A quiet run beats a filler post.
-- To run it by hand: `gh workflow run draft-post.yml`. It needs a `HYPER_API_KEY` secret; the model comes from the `PI_MODEL` repository variable, defaulting to `glm-5.3-flash`.
+- To run it by hand: `gh workflow run draft-post.yml`. It needs `HYPER_API_KEY` and `JINA_API_KEY` secrets; the model comes from the `PI_MODEL` repository variable, defaulting to `glm-5.3-flash`.
 
 ## Operating rules
 

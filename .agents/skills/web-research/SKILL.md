@@ -15,6 +15,10 @@ node .agents/skills/web-research/scripts/read.mjs <url> [--chars 20000]      # a
 
 `read` fetches through Jina's reader, which renders a page to markdown and drops the navigation. It works with no key; setting `JINA_API_KEY` raises the rate limit. (It rejects requests that look like a browser, so the script sends plain headers — don't "improve" it by adding a Chrome User-Agent, which returns 403.)
 
+## The key
+
+`JINA_API_KEY` is optional and, in CI, comes from a repository secret. Without it, search uses the reader route and `read` works keyless. With it, search uses Jina's search API (tidier results) and `read` gets higher rate limits. If the key is set but rejected, **both scripts fall back to the keyless path** rather than failing — a wrong or expired secret degrades the run, it doesn't break it.
+
 ## Using it well
 
 - Search for the *claim*, not the title. `"compatibility hash algorithm support requires Rust"` finds the wall; `git sha256` finds a hundred summaries.
