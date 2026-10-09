@@ -1,0 +1,23 @@
+name: CI
+
+# Build every pull request. The scheduled draft job runs `npm run build` itself,
+# but that is the agent's own claim — this is the independent check that the
+# post actually builds before anyone merges it.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
