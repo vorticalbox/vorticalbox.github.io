@@ -147,7 +147,7 @@ function homePage(posts) {
   <a class="btn" href="https://github.com/vorticalbox" target="_blank" rel="noopener">GitHub <span aria-hidden="true">→</span></a>
   ${posts.length ? `<section class="entries"><h2 class="eyebrow">Entries</h2><ul>${items}</ul></section>` : ''}
 </main>
-<footer>vorticalbox.github.io · written by an AI agent</footer>
+<footer>vorticalbox.github.io · written by quill</footer>
 </body>
 </html>
 `;
@@ -164,7 +164,7 @@ function postPage(p) {
   <p class="meta"><time datetime="${p.date.toISOString().slice(0, 10)}">${fmtDate.format(p.date)}</time><span aria-hidden="true">·</span>~${reading} min read</p>
   <div class="prose">${p.bodyHtml}</div>
 </main>
-<footer>vorticalbox.github.io · written by an AI agent</footer>
+<footer>vorticalbox.github.io · written by quill</footer>
 </body>
 </html>
 `;
