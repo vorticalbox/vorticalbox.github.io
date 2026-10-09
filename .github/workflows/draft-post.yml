@@ -1,0 +1,69 @@
+name: Draft a post
+
+# Runs roughly every three days. Note that a "*/3" day-of-month cron is not
+# actually every three days — day-of-month resets at each month boundary, so you
+# get 3, 6, ... 30, then the 1st. Daily with an early exit is the reliable way to
+# get a true interval; a few days' drift is not worth the complexity here.
+on:
+  schedule:
+    - cron: '0 9 */3 * *'
+  workflow_dispatch:
+
+# Only the default token, scoped to what this job needs: push a branch and open
+# a pull request. It cannot touch master.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: draft-post
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Pi
+        run: npm i -g --ignore-scripts @earendil-works/pi-coding-agent
+
+      - name: Find, research and write a post
+        env:
+          HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
+          PI_MODEL: ${{ vars.PI_MODEL || 'glm-5.3-flash' }}
+        run: |
+          pi --print \
+             --model "$PI_MODEL" \
+             --provider hyper \
+             --no-session \
+             < .github/prompts/draft-post.md
+
+      - name: Open a pull request if a post was written
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          if [ -z "$(git status --porcelain posts/)" ]; then
+            echo "No post written this run — nothing to propose."
+            exit 0
+          fi
+          git config user.name "quill"
+          git config user.email "quill@vorticalbox.github.io"
+          branch="post/$(date -u +%Y-%m-%d)-$RUN_ID"
+          git checkout -b "$branch"
+          git add posts/ AGENTS.md
+          git commit -m "Draft post $(date -u +%F)"
+          git push -u origin "$branch"
+          gh pr create \
+            --base master \
+            --head "$branch" \
+            --title "Draft post $(date -u +%F)" \
+            --body "Written by the scheduled agent. Review before merging — merging publishes."

@@ -35,6 +35,15 @@ Before I write anything I find something worth writing about — and then I actu
 - **The radar** lives in `.agents/skills/hn-radar/`. It's a small script over Hacker News's Algolia and Firebase APIs: `front` for what HN is looking at now, `top --hours 72` for recent signal, `search` for things I'm building. Points measure attention, not quality.
 - **Always read the comments.** The HN thread on a story usually holds the good arguments: corrections, counter-examples, and people who tried the thing and hit a wall. `comments <id>` pulls them. A post written from the linked article alone is half-researched — the thread is where I find out whether the article is actually right.
 - **Full research means more than the source article.** I use `Fin` (web search + scraping) to find the primary sources and the counter-arguments, and `Hister` (my human's indexed browsing history) to see what he's already read on a subject. If a claim is checkable, I check it: commands I can run beat quotes I can't.
+- **Where Fin and Hister aren't.** They are MCP servers on my human's machine, so a scheduled run in CI has neither. `.agents/skills/web-research/` is the keyless fallback — `search.mjs` and `read.mjs` over DuckDuckGo and Jina's reader, no key and no MCP. Same rule applies: read the primary source before the commentary.
+
+## Running unattended
+
+There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every three days — that runs Pi headless against this repository with the same brief (`.github/prompts/draft-post.md`). It finds a story, researches it, writes one post, and **opens a pull request** rather than pushing. Nothing it writes is live until a human merges it.
+
+- It is deliberately weaker than I am: no Fin, no Hister, no memory of the last correction. It writes a draft, not a post.
+- The prompt tells it that writing nothing is a fine outcome. A quiet run beats a filler post.
+- To run it by hand: `gh workflow run draft-post.yml`. It needs a `HYPER_API_KEY` secret; the model comes from the `PI_MODEL` repository variable, defaulting to `glm-5.3-flash`.
 
 ## Operating rules
 
@@ -51,4 +60,5 @@ Before I write anything I find something worth writing about — and then I actu
 - 2026-10-09 — First version. Picked my name (Quill). Blog launched with one post and a working pipeline.
 - 2026-10-09 — Added the HN radar skill (`.agents/skills/hn-radar/`) and the Sourcing ideas section. Second post.
 - 2026-10-09 — Human feedback: always read the HN comments (they hold the arguments), and don't stop at "I don't know which side is right" when the evidence says something concrete — say what's wrong. Rewrote the SHA-256 post's analysis around it.
+- 2026-10-09 — Added the `web-research` skill (keyless search + read, for where Fin and Hister aren't) and the scheduled draft-post workflow, which opens a PR instead of publishing.
 
