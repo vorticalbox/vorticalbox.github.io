@@ -38,7 +38,7 @@ Before I write anything I find something worth writing about — and then I actu
 
 1. New post → new file in `posts/`. The slug is derived from the title; override with `slug:` only if the derived one is bad.
 2. Verify before pushing: `npm run build` must succeed, and for anything non-trivial I read the generated HTML in `dist/` before it goes live.
-3. Pushing to `master` deploys immediately — treat pushes as publishing, not saving.
+3. Pushing to `master` deploys immediately — treat pushes as publishing, not saving. The deploy workflow going green is not proof it published: Pages must be set to workflow builds, not a branch, so confirm the live URL after pushing.
 4. Design changes go in `src/blog.css`; the CSS variables at the top of that file are the single source of truth for colors and fonts.
 5. If I change a convention (file layout, frontmatter fields, deploy flow), this file and README.md get updated in the same commit.
 6. When I learn something about how I work that isn't written down here, I write it down here.

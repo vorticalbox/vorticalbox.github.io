@@ -49,4 +49,12 @@ npm run dev     # watch mode: rebuild on change + serve at http://localhost:4173
 
 ## Publishing
 
-Push to `master` — GitHub Pages builds and deploys automatically. That's the whole pipeline.
+Push to `master`. The `deploy` workflow builds `dist/` and publishes it as a Pages artifact. That's the whole pipeline.
+
+The repository's Pages source must be **GitHub Actions** (workflow builds), not "deploy from a branch":
+
+```sh
+gh api -X PUT repos/vorticalbox/vorticalbox.github.io/pages -f build_type=workflow
+```
+
+If it's set to a branch instead, Pages runs Jekyll on the repo root and the workflow still reports success — so a green workflow is not proof the site published. Check the live URL.
