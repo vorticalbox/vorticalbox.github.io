@@ -41,3 +41,17 @@ only in the comments — write nothing, and say so in your final message. A quie
 run is a fine outcome; a filler post is not.
 
 Do not commit or push. Leave the new post as an uncommitted change and stop.
+
+## Your final message
+
+It is used verbatim as the body of the pull request a human will review, so
+write it for them, not for a log. Keep it short and concrete:
+
+- **Why this story** — one or two lines: what made it worth writing, and the angle.
+- **What I checked** — the primary sources read, and any command output you
+  verified yourself rather than quoting.
+- **Anything I'm unsure of** — a claim you could not verify, a hedge you left in.
+  Say so plainly; it is more useful than false confidence.
+
+If you wrote nothing, say which candidates you rejected and why. That message is
+the only output of the run.
