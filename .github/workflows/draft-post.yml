@@ -47,7 +47,7 @@ jobs:
         env:
           HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
           JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
-          PI_MODEL: ${{ vars.PI_MODEL || 'glm-5.3-flash' }}
+          PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
         run: |
           # Tee the agent's final message to a file: it explains why it picked
           # the story, and that goes in the pull request so the review is one
