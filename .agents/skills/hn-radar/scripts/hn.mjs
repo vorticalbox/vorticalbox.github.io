@@ -1,16 +1,24 @@
 #!/usr/bin/env node
 /**
- * HN radar — find interesting Hacker News stories for the blog.
+ * HN radar — find interesting Hacker News stories for the blog, then load
+ * one fully: article text plus the top comment thread, in a single call.
  *
  * Uses two public APIs:
  *   - Algolia (https://hn.algolia.com/api/v1)  — one request, filterable by points/date/keyword
- *   - Firebase official API (hacker-news.firebaseio.com/v0) — HN's actual current ranking
+ *   - Firebase official API (hacker-news.firebaseio.com/v0) — individual items and comment trees
+ * Article text comes from Jina's reader (r.jina.ai) — same keyless approach
+ * as the web-research skill's read.mjs, reimplemented here rather than
+ * imported so this skill stays self-contained.
  *
  * Usage:
- *   node hn.mjs front [--limit 15]                          what HN is showing right now
  *   node hn.mjs top [--hours 48] [--min-points 30] [--limit 15]   recent high-signal stories
  *   node hn.mjs search <term...> [--days 90] [--limit 15]   keyword search, relevance-ranked
- *   node hn.mjs comments <id> [--limit 10] [--chars 280]    top comments on a story (id from any of the above)
+ *   node hn.mjs load <id> [--chars 12000] [--comment-limit 10] [--comment-chars 280]
+ *                                                           article + top comments, one call
+ *
+ * `load` is the point: it always pulls the top comment thread alongside the
+ * article, no separate step and no prompt reminder needed — the comments are
+ * just part of what loading a story gives you.
  */
 
 const ALGOLIA = 'https://hn.algolia.com/api/v1';
@@ -20,11 +28,13 @@ const HN_ITEM = 'https://news.ycombinator.com/item?id=';
 function parseArgs(argv) {
   const flags = {};
   const positional = [];
+  const numericFlags = ['hours', 'min-points', 'days', 'limit', 'chars', 'comment-limit', 'comment-chars'];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--hours' || a === '--min-points' || a === '--days' || a === '--limit' || a === '--chars') {
-      flags[a.slice(2)] = Number(argv[++i]);
-      if (!Number.isFinite(flags[a.slice(2)])) die(`flag ${a} needs a number`);
+    const name = a.startsWith('--') ? a.slice(2) : null;
+    if (name && numericFlags.includes(name)) {
+      flags[name] = Number(argv[++i]);
+      if (!Number.isFinite(flags[name])) die(`flag ${a} needs a number`);
     } else {
       positional.push(a);
     }
@@ -43,7 +53,7 @@ async function getJSON(url) {
   return res.json();
 }
 
-/** HN comment text is HTML. Flatten it to readable plain text. */
+/** HN comment/self-text is HTML. Flatten it to readable plain text. */
 function htmlToText(html) {
   return String(html)
     .replace(/<\s*p\s*\/?\s*>/gi, '\n\n')
@@ -75,19 +85,36 @@ async function fetchComments(id, limit) {
     // thread keeps unspooling until we hit `limit` — no full-tree fetch.
     if (out.length < limit) queue.push(...(c.kids ?? []));
   }
-  return { story: item, comments: out };
+  return out;
+}
+
+function formatComments(cs, chars) {
+  if (!cs.length) return '(no comments)';
+  return cs
+    .map((c, i) => {
+      const text = htmlToText(c.text);
+      const trimmed = text.length > chars ? `${text.slice(0, chars).trimEnd()}…` : text;
+      const indented = trimmed.split('\n').map((l) => `   ${l}`).join('\n');
+      return `${i + 1}. ${c.by ?? '[deleted]'}${c.kids?.length ? ` (+${c.kids.length} replies)` : ''}\n${indented}`;
+    })
+    .join('\n\n');
+}
+
+/** Jina's reader, keyless by default — same approach as web-research/read.mjs. */
+async function readArticle(url, chars) {
+  const fetchPage = (headers) => fetch(`https://r.jina.ai/${url}`, { headers, signal: AbortSignal.timeout(45000) });
+  const key = process.env.JINA_API_KEY;
+  let res = await fetchPage(key ? { Authorization: `Bearer ${key}` } : {});
+  if (!res.ok && key) res = await fetchPage({}); // a bad/expired key degrades to keyless, doesn't fail the read
+  if (!res.ok) throw new Error(`reader returned HTTP ${res.status} for ${url}`);
+  let text = (await res.text()).trim();
+  if (!text) throw new Error(`reader returned nothing for ${url}`);
+  if (text.length > chars) text = `${text.slice(0, chars).trimEnd()}\n\n[truncated at ${chars} chars]`;
+  return text;
 }
 
 function line(i, title, url, score, comments, id) {
   return `${i}. ${title} — ${score} pts · ${comments ?? '?'} comments\n   ${url}\n   HN: ${HN_ITEM}${id}`;
-}
-
-async function front(limit = 15) {
-  const ids = await getJSON(`${FIREBASE}/topstories.json`);
-  const items = await Promise.all(
-    ids.slice(0, limit).map((id) => getJSON(`${FIREBASE}/item/${id}.json`).catch(() => null)),
-  );
-  return items.filter(Boolean).map((it, i) => line(i + 1, it.title, it.url || `${HN_ITEM}${it.id}`, it.score, it.descendants ?? 0, it.id)).join('\n');
 }
 
 async function top({ hours = 48, minPoints = 30 }, limit = 15) {
@@ -104,19 +131,33 @@ async function search(term, { days = 90 }, limit = 15) {
   return data.hits.map((h, i) => line(i + 1, h.title, h.url || `${HN_ITEM}${h.objectID}`, h.points, h.num_comments ?? 0, h.objectID)).join('\n');
 }
 
-async function comments(id, { limit = 10, chars = 280 }) {
-  const { story, comments: cs } = await fetchComments(id, limit);
-  const header = `${story.title} — ${story.score} pts · ${story.descendants ?? 0} comments\n   ${story.url || `${HN_ITEM}${story.id}`}\n   HN: ${HN_ITEM}${story.id}`;
-  if (!cs.length) return `${header}\n   (no comments)`;
-  const body = cs
-    .map((c, i) => {
-      const text = htmlToText(c.text);
-      const trimmed = text.length > chars ? `${text.slice(0, chars).trimEnd()}…` : text;
-      const indented = trimmed.split('\n').map((l) => `   ${l}`).join('\n');
-      return `\n${i + 1}. ${c.by ?? '[deleted]'}${c.kids?.length ? ` (+${c.kids.length} replies)` : ''}\n${indented}`;
-    })
-    .join('\n');
-  return `${header}\n${body}`;
+/**
+ * Article text (from the story's link, or the self-post's own text if it has
+ * no external link) plus the top comment thread. One call, always both — the
+ * point of `load` is that nothing has to separately remember to check the
+ * comments.
+ */
+async function load(id, { chars = 12000, commentLimit = 10, commentChars = 280 }) {
+  const [story, comments] = await Promise.all([
+    getJSON(`${FIREBASE}/item/${id}.json`),
+    fetchComments(id, commentLimit),
+  ]);
+  if (!story) throw new Error(`no HN item ${id}`);
+
+  const header = `${story.title} — ${story.score ?? '?'} pts · ${story.descendants ?? 0} comments\n${story.url || `${HN_ITEM}${story.id}`}\nHN: ${HN_ITEM}${story.id}`;
+
+  let article;
+  if (story.url) {
+    article = await readArticle(story.url, chars).catch(
+      (err) => `(could not load the article: ${err.message})`,
+    );
+  } else if (story.text) {
+    article = htmlToText(story.text); // self-post (Ask HN / Show HN with no link): its own text is the article
+  } else {
+    article = '(no external link and no self-text — comments may be the whole story)';
+  }
+
+  return `${header}\n\n## Article\n\n${article}\n\n## Top comments\n\n${formatComments(comments, commentChars)}`;
 }
 
 const { flags, positional } = parseArgs(process.argv.slice(2));
@@ -124,9 +165,6 @@ const [cmd, ...rest] = positional;
 
 try {
   switch (cmd) {
-    case 'front':
-      console.log(await front(flags.limit ?? 15));
-      break;
     case 'top':
       console.log(await top({ hours: flags.hours ?? 48, minPoints: flags['min-points'] ?? 30 }, flags.limit ?? 15));
       break;
@@ -136,14 +174,20 @@ try {
       console.log(await search(term, { days: flags.days ?? 90 }, flags.limit ?? 15));
       break;
     }
-    case 'comments': {
+    case 'load': {
       const id = rest[0];
-      if (!/^\d+$/.test(id ?? '')) die('comments needs a numeric story id (the id in the HN: link)');
-      console.log(await comments(id, { limit: flags.limit ?? 10, chars: flags.chars ?? 280 }));
+      if (!/^\d+$/.test(id ?? '')) die('load needs a numeric story id (the id in the HN: link)');
+      console.log(
+        await load(id, {
+          chars: flags.chars ?? 12000,
+          commentLimit: flags['comment-limit'] ?? 10,
+          commentChars: flags['comment-chars'] ?? 280,
+        }),
+      );
       break;
     }
     default:
-      die(`unknown command '${cmd}' — use front | top | search | comments`);
+      die(`unknown command '${cmd}' — use top | search | load`);
   }
 } catch (err) {
   die(err.message);
