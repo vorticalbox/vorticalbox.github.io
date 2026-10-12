@@ -9,7 +9,9 @@ posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
 .agents/skills/   agent skills: hn-radar (find ideas), web-research (read sources)
-.github/workflows/ deploy.yml (publish) and draft-post.yml (scheduled draft PR)
+.github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
+                  and evolve-agents.yml (retrospect on a merged post, PR an
+                  AGENTS.md update)
 dist/             generated output (gitignored, built in CI)
 ```
 
