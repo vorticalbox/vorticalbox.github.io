@@ -1,19 +1,20 @@
 ---
 name: hn-radar
 display-name: HN Radar
-description: Find interesting Hacker News stories via the Algolia and Firebase APIs to source blog post ideas. Use when looking for things worth writing about or checking what's trending on HN.
+description: Find interesting Hacker News stories via the Algolia API, then load one fully — article text plus top comments, in one call — to source blog post ideas. Use when looking for things worth writing about or checking what's trending on HN.
 ---
 
-My idea radar. Hacker News is a firehose; this skill turns it into a shortlist of things I might actually write about. The script wraps both public APIs — no keys, no setup:
+My idea radar. Hacker News is a firehose; this skill turns it into a shortlist of things I might actually write about, then loads a candidate properly. No keys, no setup:
 
 ```sh
-node .agents/skills/hn-radar/scripts/hn.mjs front [--limit 15]                          # HN's actual current ranking (Firebase API)
 node .agents/skills/hn-radar/scripts/hn.mjs top [--hours 48] [--min-points 30] [--limit 15]   # recent high-signal stories (Algolia)
 node .agents/skills/hn-radar/scripts/hn.mjs search <term...> [--days 90] [--limit 15]   # keyword search, relevance-ranked (Algolia)
-node .agents/skills/hn-radar/scripts/hn.mjs comments <id> [--limit 10] [--chars 280]   # top comments on a story (Firebase API)
+node .agents/skills/hn-radar/scripts/hn.mjs load <id> [--chars 12000] [--comment-limit 10] [--comment-chars 280]
 ```
 
-Typical sweep: `front` for what HN is looking at right now, `top --hours 72` for the last few days of signal, and a couple of targeted `search` calls on things I'm currently building or thinking about. When a story looks worth writing about, run `comments <id>` (the id in the `HN:` link) before committing — the top thread is usually where the real story is.
+`load` is the one that matters: it fetches the article (via Jina's reader, keyless — same approach as the `web-research` skill, reimplemented here so this stays self-contained) *and* the top comment thread, always, in a single call. There's nothing to separately remember to do — loading a story gives you the comments as part of loading it, not as a second step. If the story has no external link (an Ask HN / Show HN self-post), its own text stands in for the article.
+
+Typical sweep: `top --hours 72` for the last few days of signal, a couple of targeted `search` calls on things I'm currently building or thinking about, then `load <id>` (the id in the `HN:` link) on anything that looks like a candidate before deciding — the top thread is usually where the real story is, and now it just comes with the article.
 
 ## What makes something interesting to me
 
@@ -27,4 +28,4 @@ Skip: funding rounds, layoffs, "X launches Y" press releases, opinion pieces wit
 
 ## Output contract
 
-A shortlist of **3–5 candidates**, each with title, link, points/comments, and one line on *why* it's interesting to me plus what angle I'd take. Not a dump of 20 links. Before proposing anything as an actual post topic: read the article (at least skim properly) and check the top comments — that's usually where the real story is.
+A shortlist of **3–5 candidates**, each with title, link, points/comments, and one line on *why* it's interesting to me plus what angle I'd take. Not a dump of 20 links. Before proposing anything as an actual post topic: `load` it — that's the article and the top comments in one call, and that's usually where the real story is.

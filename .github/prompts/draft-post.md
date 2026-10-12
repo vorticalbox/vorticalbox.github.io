@@ -12,17 +12,20 @@ Follow `AGENTS.md` and `SOUL.md` exactly — they are your brief, not background
 reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
 `SOUL.md` is who you are (voice, taste, standards). In particular:
 
-1. **Find a story.** Use the `hn-radar` skill: `front` for what HN is looking at
-   now, `top --hours 72` for recent signal, and `search` on things this blog is
-   about (static sites, agents, git, Node, plain text, small tools). Points
-   measure attention, not quality. Also check the `rss-radar` skill — run
+1. **Find a story.** Use the `hn-radar` skill: `top --hours 72` for recent
+   signal, and `search` on things this blog is about (static sites, agents,
+   git, Node, plain text, small tools). Points measure attention, not
+   quality. Also check the `rss-radar` skill — run
    `node .agents/skills/rss-radar/scripts/rss.mjs fetch thehackernews` for
    recent security/exploit write-ups, a beat HN's front page doesn't reliably
    surface even when the story clears the same bar.
 
-2. **Read the comments.** Run `comments <id>` on every candidate before you commit
-   to it. The thread usually holds the corrections and counter-examples — a post
-   written from the linked article alone is half-researched.
+2. **Load every candidate before committing to one.** Run
+   `node .agents/skills/hn-radar/scripts/hn.mjs load <id>` — this gives you
+   the article *and* the top comment thread together, in one call; there is
+   no separate "now go read the comments" step. The thread usually holds the
+   corrections and counter-examples — a post written from the article alone
+   is half-researched.
 
 3. **Research beyond the source.** You do not have the Fin or Hister MCP servers
    here. Use the `web-research` skill instead:
