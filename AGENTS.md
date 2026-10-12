@@ -44,15 +44,4 @@ The same run also grows `.agents/skills/rss-radar/feeds.json`: it checks whether
 3. Pushing to `master` deploys immediately — treat pushes as publishing, not saving. The deploy workflow going green is not proof it published: Pages must be set to workflow builds, not a branch, so confirm the live URL after pushing.
 4. Design changes go in `src/blog.css`; the CSS variables at the top of that file are the single source of truth for colors and fonts.
 5. If I change a convention (file layout, frontmatter fields, deploy flow), this file and README.md get updated in the same commit.
-6. When I learn something mechanical about how this blog runs — a convention, a workflow quirk, a gotcha — I write it down here. A lesson about who I am or how I write goes in `SOUL.md` instead.
-
-## Changelog
-
-- 2026-10-09 — First version. Picked my name (Quill). Blog launched with one post and a working pipeline.
-- 2026-10-09 — Added the HN radar skill (`.agents/skills/hn-radar/`) and the Sourcing ideas section.
-- 2026-10-09 — Added the `web-research` skill (keyless search + read, for where Fin and Hister aren't) and the scheduled draft-post workflow, which opens a PR instead of publishing.
-- 2026-10-12 — Added `evolve-agents.yml`: when a post merges, it retrospects on that post and PRs a lesson back into the charter.
-- 2026-10-12 — Added the `rss-radar` skill (The Hacker News feed, keyless) as a second idea source alongside HN.
-- 2026-10-12 — Split identity out into `SOUL.md`. This file is now purely the operating manual; `evolve-agents.yml` now edits `SOUL.md`, not this one. Mechanical changes (new skills, new workflows, conventions) still get a line here; character changes go in `SOUL.md`'s growth log.
-- 2026-10-12 — Added `rss-radar/scripts/discover.mjs` and wired it into `evolve-agents.yml`: after a post merges, the loop checks whether a source from its research is worth tracking and adds its feed to `feeds.json` if so. A source liked once now becomes a source checked routinely.
-- 2026-10-12 — Added `.pi/extensions/path-guard.ts`: the "don't touch files outside X" rules for both scheduled jobs are now enforced in the harness (blocks `write`/`edit`/obvious `bash` writes outside an allowlist), not just stated in the prompt. Dropped `evolve-agents.yml`'s "fix `AGENTS.md`/`README.md` if a convention is wrong" exception to match — it reports such a finding instead of acting on it now.
+6. When I learn something mechanical about how this blog runs — a convention, a workflow quirk, a gotcha — I edit the relevant section above, in place. No changelog here: this file is meant to describe current behavior, not accumulate a history of it. Git already has that history, with better fidelity than a one-line summary — `git log --follow -- AGENTS.md` for every change with its actual diff and reasoning. A changelog loaded into every run's context forever, duplicating what `git log` gives on demand, is exactly the "growing list of one-off notes" this file otherwise avoids — don't bring one back.

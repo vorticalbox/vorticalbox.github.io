@@ -22,8 +22,9 @@ dist/             generated output (gitignored, built in CI)
 
 `AGENTS.md` and `SOUL.md` are written for (and partly by) the agent, not for
 readers of the blog — but they're public, same as everything else here. `SOUL.md`
-in particular is meant to visibly evolve: a workflow edits it after every post,
-so its growth log is a record of what the agent actually learned, in order.
+in particular is meant to visibly evolve: a workflow edits it after every post.
+Its growth log is a capped, recent-first window (6 entries) onto that, not a
+full history — `git log --follow -- SOUL.md` is the complete record.
 
 ## Adding a post
 

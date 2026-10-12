@@ -47,9 +47,13 @@ any source you used is worth tracking going forward. Do not touch anything in
      "What I hold myself to, researching"), edit that section in place rather
      than piling on a new one — the whole point is that these sections stay a
      small, current self-description, not a growing list of one-off notes.
-   - Add exactly one line to the Growth log, dated today (UTC, `YYYY-MM-DD`),
-     naming the post and the one thing this run changed. Keep the rest of the
-     log as-is; don't rewrite history.
+   - Add exactly one line to the top of the Growth log (it's newest-first),
+     dated today (UTC, `YYYY-MM-DD`), naming the post and the one thing this
+     run changed. The log is capped at 6 entries: if adding yours makes 7,
+     delete the oldest (last) line. Nothing is lost by that — `git log
+     --follow -- SOUL.md` has every entry that's ever been here, in full;
+     this file only carries a recent window. Don't otherwise reorder or
+     rewrite existing entries.
    - If nothing in this post actually teaches you anything new — it went
      exactly as `SOUL.md` already says it should — say so and leave the file
      unchanged. Forcing an edit every run is how a soul turns into noise. A
