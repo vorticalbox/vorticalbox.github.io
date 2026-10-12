@@ -1,0 +1,142 @@
+name: Evolve AGENTS.md
+
+# Runs when a post lands on master. draft-post.yml writes a post *from*
+# AGENTS.md; this writes a lesson *back into* AGENTS.md, so the file keeps
+# evolving into a real charter instead of staying a fixed brief forever.
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - 'posts/**'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to retrospect on (for a manual run)'
+        required: true
+
+# Only the default token, scoped to what this job needs: push a branch and
+# open a pull request. It cannot touch master directly — AGENTS.md is the
+# charter this agent runs from, so a change to it gets the same human review
+# a post does.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: evolve-agents
+  cancel-in-progress: false
+
+jobs:
+  evolve:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Find the merged post
+        id: post
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.inputs.pr_number || github.event.pull_request.number }}
+        run: |
+          echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
+          gh pr view "$PR_NUMBER" --json body --jq '.body // ""' >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          post_path="$(gh pr view "$PR_NUMBER" --json files --jq '[.files[].path | select(startswith("posts/") and endswith(".md"))][0] // ""')"
+          if [ -z "$post_path" ]; then
+            echo "No markdown file under posts/ in PR #$PR_NUMBER — nothing to retrospect on."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "path=$post_path" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        if: steps.post.outputs.skip != 'true'
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+        if: steps.post.outputs.skip != 'true'
+
+      - name: Install Pi
+        if: steps.post.outputs.skip != 'true'
+        run: npm i -g --ignore-scripts @earendil-works/pi-coding-agent
+
+      # Same approach as draft-post.yml: Hyper isn't a provider Pi knows
+      # about, so it's declared via a template whose apiKey is the
+      # $HYPER_API_KEY env var, not the key itself.
+      - name: Register the Hyper provider
+        if: steps.post.outputs.skip != 'true'
+        run: |
+          mkdir -p ~/.pi/agent
+          cp .github/pi/models.json ~/.pi/agent/models.json
+
+      - name: Reflect on the post and update AGENTS.md
+        if: steps.post.outputs.skip != 'true'
+        env:
+          HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
+          JINA_API_KEY: ${{ secrets.JINA_TOKEN }}
+          PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
+          MERGED_POST: ${{ steps.post.outputs.path }}
+          PR_BODY: ${{ steps.post.outputs.pr_body }}
+        run: |
+          {
+            cat .github/prompts/evolve-agents.md
+            echo
+            echo "## This run"
+            echo
+            echo "MERGED_POST: $MERGED_POST"
+            echo
+            echo "PR_BODY:"
+            echo '```'
+            echo "$PR_BODY"
+            echo '```'
+          } | pi --print \
+                 --model "$PI_MODEL" \
+                 --provider hyper \
+                 --no-session \
+                 --approve \
+                 | tee "$RUNNER_TEMP/agent-summary.txt"
+
+      - name: Open a pull request if AGENTS.md changed
+        if: steps.post.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+          MERGED_POST: ${{ steps.post.outputs.path }}
+        run: |
+          if [ -z "$(git status --porcelain AGENTS.md)" ]; then
+            echo "AGENTS.md unchanged — nothing learned this run."
+            echo "--- agent summary ---"
+            cat "$RUNNER_TEMP/agent-summary.txt"
+            exit 0
+          fi
+
+          git config user.name "quill"
+          git config user.email "quill@vorticalbox.github.io"
+          branch="evolve/$(date -u +%Y-%m-%d)-$RUN_ID"
+          git checkout -b "$branch"
+          git add AGENTS.md README.md
+          git commit -m "Evolve AGENTS.md after $(basename "$MERGED_POST" .md)"
+          git push -u origin "$branch"
+
+          {
+            echo "Written by the retrospective agent from \`.github/prompts/evolve-agents.md\`,"
+            echo "after \`$MERGED_POST\` was merged."
+            echo
+            echo "**Review before merging — this changes the brief every future run reads.**"
+            echo
+            # The agent's final message, capped so a chatty run can't fill the PR.
+            head -c 4000 "$RUNNER_TEMP/agent-summary.txt" 2>/dev/null || echo "_no summary captured_"
+          } > "$RUNNER_TEMP/pr-body.md"
+
+          gh pr create \
+            --base master \
+            --head "$branch" \
+            --title "Evolve AGENTS.md after $(basename "$MERGED_POST" .md)" \
+            --body-file "$RUNNER_TEMP/pr-body.md"

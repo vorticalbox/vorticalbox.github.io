@@ -50,15 +50,19 @@ jobs:
           JINA_API_KEY: ${{ secrets.JINA_TOKEN }}
           PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
         run: |
-          # Tee the agent's final message to a file: it explains why it picked
-          # the story, and that goes in the pull request so the review is one
-          # glance rather than a diff read.
-          pi --print \
+          # --mode json streams one event per action, which live-log.mjs prints
+          # as it arrives, so the step is readable while it runs rather than
+          # blank for ten minutes. pipefail makes Pi's exit code fail the step:
+          # without it a crashed agent looks exactly like a quiet run, because
+          # both leave no changes for the PR step to find.
+          set -o pipefail
+          pi --mode json \
              --model "$PI_MODEL" \
              --provider hyper \
              --no-session \
              --approve \
-             < .github/prompts/draft-post.md | tee "$RUNNER_TEMP/agent-summary.txt"
+             < .github/prompts/draft-post.md \
+            | node .github/pi/live-log.mjs "$RUNNER_TEMP/agent-summary.txt"
 
       - name: Open a pull request if a post was written
         env:
