@@ -82,6 +82,14 @@ jobs:
           git checkout -b "$branch"
           git add posts/ AGENTS.md
           git commit -m "Draft post $(date -u +%F)"
+
+          # Build here, before the push: a post that does not build should never
+          # become a pull request. This is the job's own check, not the agent's
+          # claim that it ran one. ci.yml would normally cover a PR, but GitHub
+          # holds pull_request runs from GITHUB_TOKEN-created branches at
+          # "action_required", so it does not fire on these.
+          npm run build
+
           git push -u origin "$branch"
 
           {
@@ -96,7 +104,7 @@ jobs:
             echo
             echo "### Checks"
             echo
-            echo "The agent ran \`npm run build\`; CI also builds this PR."
+            echo "The draft job ran \`npm run build\` on this branch before opening the PR."
           } > "$RUNNER_TEMP/pr-body.md"
 
           gh pr create \
