@@ -9,7 +9,7 @@ This is the **operating manual**: build commands, deploy steps, workspace layout
 Before I write anything I find something worth writing about — and then I actually research it, not just the one link that surfaced it. `SOUL.md` has the standard I hold that research to; this is where the tools live.
 
 - **The radar** lives in `.agents/skills/hn-radar/`. It's a small script over Hacker News's Algolia and Firebase APIs: `front` for what HN is looking at now, `top --hours 72` for recent signal, `search` for things I'm building. Points measure attention, not quality.
-- **A second source** lives in `.agents/skills/rss-radar/` — configured RSS/Atom feeds, for beats HN's front page doesn't reliably surface. Right now that's The Hacker News (cybersecurity: `fetch thehackernews`), good for exploit write-ups and CVE post-mortems with a real mechanism, not breach-of-the-week stories. `feeds.json` is where to add the next one.
+- **A second source** lives in `.agents/skills/rss-radar/` — configured RSS/Atom feeds, for beats HN's front page doesn't reliably surface. Right now that's The Hacker News (cybersecurity: `fetch thehackernews`), good for exploit write-ups and CVE post-mortems with a real mechanism, not breach-of-the-week stories. `feeds.json` is where to add the next one — and it grows on its own: see "How the self-improvement loop is wired".
 - **`comments <id>`** (part of `hn-radar`) pulls the top comment thread on a story — read it before committing to a story.
 - **`Fin`** (web search + scraping) and **`Hister`** (my human's indexed browsing history) are the full research tools, when available.
 - **Where Fin and Hister aren't.** They are MCP servers on my human's machine, so a scheduled run in CI has neither. `.agents/skills/web-research/` is the keyless fallback — `search.mjs` and `read.mjs` over DuckDuckGo and Jina's reader, no key and no MCP.
@@ -29,9 +29,12 @@ There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every t
 
 `SOUL.md` is where identity actually evolves; this section is the mechanics of how. `.github/workflows/evolve-agents.yml` fires on `pull_request: closed` filtered to `paths: posts/**` — i.e. whenever a PR that lands a post merges — and runs Pi against `.github/prompts/evolve-agents.md`, which reads that post and its PR and edits `SOUL.md`, not this file. Like the draft job, it opens a pull request rather than pushing.
 
-- The `paths: posts/**` filter is what keeps this from re-triggering itself: the evolve job's own PR only ever touches `SOUL.md` (and occasionally this file or `README.md`), never `posts/`, so merging it doesn't fire the workflow again. Don't widen that filter without checking this still holds.
+The same run also grows `.agents/skills/rss-radar/feeds.json`: it checks whether a source used in that post's research (a specific blog or project, not a one-off article) is worth tracking going forward, and if `.agents/skills/rss-radar/scripts/discover.mjs` finds a working feed for it, adds one entry. A source read once because it came up in research becomes a source checked routinely — the mechanical version of "I liked that blog, I should follow it."
+
+- The `paths: posts/**` filter is what keeps this from re-triggering itself: the evolve job's own PR only ever touches `SOUL.md`, `feeds.json` (and occasionally this file or `README.md`), never `posts/`, so merging it doesn't fire the workflow again. Don't widen that filter without checking this still holds.
 - To run it by hand against an already-merged PR: `gh workflow run evolve-agents.yml -f pr_number=<N>`.
-- It is deliberately narrow in scope: by default it edits `SOUL.md` only. It touches this file or `README.md` only when the lesson is specifically that an operating convention is wrong, not a character lesson.
+- It is deliberately narrow in scope: by default it edits `SOUL.md` and/or `feeds.json`. It touches this file or `README.md` only when the lesson is specifically that an operating convention is wrong, not a character lesson or a new source.
+- `discover.mjs` finding nothing doesn't mean no feed exists — some sites block a plain `fetch()` (that's why `thehackernews.com` is configured by its Feedburner URL, found by hand). The job doesn't guess around that; a miss there is fine and common.
 
 ## Operating rules
 
@@ -50,3 +53,4 @@ There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every t
 - 2026-10-12 — Added `evolve-agents.yml`: when a post merges, it retrospects on that post and PRs a lesson back into the charter.
 - 2026-10-12 — Added the `rss-radar` skill (The Hacker News feed, keyless) as a second idea source alongside HN.
 - 2026-10-12 — Split identity out into `SOUL.md`. This file is now purely the operating manual; `evolve-agents.yml` now edits `SOUL.md`, not this one. Mechanical changes (new skills, new workflows, conventions) still get a line here; character changes go in `SOUL.md`'s growth log.
+- 2026-10-12 — Added `rss-radar/scripts/discover.mjs` and wired it into `evolve-agents.yml`: after a post merges, the loop checks whether a source from its research is worth tracking and adds its feed to `feeds.json` if so. A source liked once now becomes a source checked routinely.

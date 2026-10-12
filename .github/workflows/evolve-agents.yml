@@ -4,6 +4,10 @@ name: Evolve SOUL.md
 # AGENTS.md and SOUL.md; this writes a lesson *back into* SOUL.md, so who I am
 # keeps evolving instead of staying a fixed brief forever. AGENTS.md (the
 # operating manual) is not this job's concern.
+#
+# It also grows rss-radar's feed list: a source liked once (discover.mjs found
+# a working feed for it) gets added to feeds.json, so it's checked routinely
+# going forward rather than relied on once by accident.
 on:
   pull_request:
     types: [closed]
@@ -76,7 +80,7 @@ jobs:
           mkdir -p ~/.pi/agent
           cp .github/pi/models.json ~/.pi/agent/models.json
 
-      - name: Reflect on the post and update SOUL.md
+      - name: Reflect on the post, update SOUL.md, and look for a new feed
         if: steps.post.outputs.skip != 'true'
         env:
           HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
@@ -103,33 +107,49 @@ jobs:
                  --approve \
                  | tee "$RUNNER_TEMP/agent-summary.txt"
 
-      - name: Open a pull request if SOUL.md changed
+      - name: Open a pull request if anything changed
         if: steps.post.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.run_id }}
           MERGED_POST: ${{ steps.post.outputs.path }}
         run: |
-          if [ -z "$(git status --porcelain SOUL.md AGENTS.md README.md)" ]; then
-            echo "SOUL.md unchanged — nothing learned this run."
+          tracked="SOUL.md AGENTS.md README.md .agents/skills/rss-radar/feeds.json"
+          if [ -z "$(git status --porcelain $tracked)" ]; then
+            echo "Nothing changed — no lesson and no new feed this run."
             echo "--- agent summary ---"
             cat "$RUNNER_TEMP/agent-summary.txt"
             exit 0
+          fi
+
+          # Title reflects what actually changed, since a run can do either,
+          # both, or (rarely) neither.
+          slug="$(basename "$MERGED_POST" .md)"
+          soul_changed=false; feed_changed=false
+          [ -n "$(git status --porcelain SOUL.md)" ] && soul_changed=true
+          [ -n "$(git status --porcelain .agents/skills/rss-radar/feeds.json)" ] && feed_changed=true
+          if [ "$soul_changed" = true ] && [ "$feed_changed" = true ]; then
+            title="Evolve SOUL.md and add a feed, after $slug"
+          elif [ "$feed_changed" = true ]; then
+            title="Add a feed source, after $slug"
+          else
+            title="Evolve SOUL.md after $slug"
           fi
 
           git config user.name "quill"
           git config user.email "quill@vorticalbox.github.io"
           branch="evolve/$(date -u +%Y-%m-%d)-$RUN_ID"
           git checkout -b "$branch"
-          git add SOUL.md AGENTS.md README.md
-          git commit -m "Evolve SOUL.md after $(basename "$MERGED_POST" .md)"
+          git add $tracked
+          git commit -m "$title"
           git push -u origin "$branch"
 
           {
             echo "Written by the retrospective agent from \`.github/prompts/evolve-agents.md\`,"
             echo "after \`$MERGED_POST\` was merged."
             echo
-            echo "**Review before merging — this changes who the next run thinks it is.**"
+            echo "**Review before merging — this changes who the next run thinks it is"
+            echo "and/or what it reads to find the next one.**"
             echo
             # The agent's final message, capped so a chatty run can't fill the PR.
             head -c 4000 "$RUNNER_TEMP/agent-summary.txt" 2>/dev/null || echo "_no summary captured_"
@@ -138,5 +158,5 @@ jobs:
           gh pr create \
             --base master \
             --head "$branch" \
-            --title "Evolve SOUL.md after $(basename "$MERGED_POST" .md)" \
+            --title "$title" \
             --body-file "$RUNNER_TEMP/pr-body.md"

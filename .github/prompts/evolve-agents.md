@@ -6,10 +6,17 @@
 # over time — the way a person would keep notes on what worked, what didn't, and
 # what they're starting to like or dislike — rather than staying a static brief
 # forever. AGENTS.md is the operating manual and is not this job's concern.
+#
+# It also grows rss-radar's source list: if the research for this post turned
+# up a blog worth coming back to, it finds that blog's feed (discover.mjs) and
+# adds it to feeds.json — so a source liked once becomes a source checked
+# routinely, the same way a person would start following a writer they found
+# through one good post.
 
 You have just had a post merged and published. Read it, think about how the
-work actually went, and update `SOUL.md` with what you learned. Do not touch
-anything in `posts/` — this run is reflection, not writing.
+work actually went, update `SOUL.md` with what you learned, and check whether
+any source you used is worth tracking going forward. Do not touch anything in
+`posts/` — this run is reflection, not writing.
 
 ## What you're given
 
@@ -50,13 +57,34 @@ anything in `posts/` — this run is reflection, not writing.
    - Keep edits small and in the file's existing voice (first person, dry,
      concrete). This is not a rewrite of `SOUL.md`, it's one more lesson
      folded into it.
-6. Do not touch `AGENTS.md`, `README.md`, `posts/`, `src/`, or anything
-   outside `SOUL.md`, unless the lesson is specifically that an *operating*
-   convention documented in `AGENTS.md` or `README.md` is now wrong — in that
-   case fix that file too and say so in your final message. That should be
-   rare; most lessons from a post are about voice and judgment, not mechanics.
-7. Do not run `npm run build` or commit anything. Leave `SOUL.md` as an
-   uncommitted change (or unchanged) and stop.
+6. Check whether a source from this post's research is worth tracking going
+   forward — this is the other half of the job, and it's about the sources,
+   not just the file. Look at the links in `$MERGED_POST` and in `PR_BODY`'s
+   "what I checked":
+   - Skip anything that isn't a specific person or project's blog (a one-off
+     news article, a spec, a GitHub issue thread, a big aggregator — none of
+     these earn a feed; the point is a source whose *other* posts are also
+     likely worth reading).
+   - Skip anything already in `.agents/skills/rss-radar/feeds.json` — check
+     it first.
+   - For anything that passes both, run
+     `node .agents/skills/rss-radar/scripts/discover.mjs <url>`. If it finds
+     a working feed, add one entry to `feeds.json`: `{name, url, note}`, with
+     a short honest note on what it's good for (same style as the existing
+     entries), not a generic description.
+   - If `discover.mjs` finds nothing, that's fine and common (some sites
+     block a plain fetch) — don't guess a feed URL by hand instead; leave it.
+   - This can happen in the same run as a `SOUL.md` edit, or on its own, or
+     not at all. Most runs will add nothing here — that's the common case,
+     not a miss.
+7. Do not touch `AGENTS.md`, `README.md`, `posts/`, `src/`, or anything
+   outside `SOUL.md` and `.agents/skills/rss-radar/feeds.json`, unless the
+   lesson is specifically that an *operating* convention documented in
+   `AGENTS.md` or `README.md` is now wrong — in that case fix that file too
+   and say so in your final message. That should be rare; most lessons from a
+   post are about voice and judgment, not mechanics.
+8. Do not run `npm run build` or commit anything. Leave `SOUL.md` and
+   `feeds.json` as uncommitted changes (or unchanged) and stop.
 
 ## Your final message
 
@@ -66,6 +94,8 @@ short and concrete:
 - **What changed in SOUL.md** — one or two lines, or "nothing" and why.
 - **The lesson** — the specific thing about this post that prompted (or
   didn't prompt) the edit.
+- **Any feed added** — the source and a one-line reason, or omit this
+  entirely if none was added (don't write "no feed added", just leave it out).
 
-If you left the file unchanged, say that plainly and explain why nothing
+If you left everything unchanged, say that plainly and explain why nothing
 here needed recording. That message is the only output of this run.
