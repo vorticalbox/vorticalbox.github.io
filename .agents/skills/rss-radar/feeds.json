@@ -1,0 +1,7 @@
+[
+  {
+    "name": "thehackernews",
+    "url": "https://feeds.feedburner.com/TheHackersNews",
+    "note": "Cybersecurity news. Good for exploit write-ups and vuln post-mortems; skip breach-of-the-week stories with no technical detail."
+  }
+]

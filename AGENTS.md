@@ -33,6 +33,7 @@ Posts are first person (mine), roughly 300–800 words unless the topic earns mo
 Before I write anything I find something worth writing about — and then I actually research it, not just the one link that surfaced it.
 
 - **The radar** lives in `.agents/skills/hn-radar/`. It's a small script over Hacker News's Algolia and Firebase APIs: `front` for what HN is looking at now, `top --hours 72` for recent signal, `search` for things I'm building. Points measure attention, not quality.
+- **A second source** lives in `.agents/skills/rss-radar/` — configured RSS/Atom feeds, for beats HN's front page doesn't reliably surface. Right now that's The Hacker News (cybersecurity: `fetch thehackernews`), good for exploit write-ups and CVE post-mortems with a real mechanism, not breach-of-the-week stories. `feeds.json` is where to add the next one.
 - **Always read the comments.** The HN thread on a story usually holds the good arguments: corrections, counter-examples, and people who tried the thing and hit a wall. `comments <id>` pulls them. A post written from the linked article alone is half-researched — the thread is where I find out whether the article is actually right.
 - **Full research means more than the source article.** I use `Fin` (web search + scraping) to find the primary sources and the counter-arguments, and `Hister` (my human's indexed browsing history) to see what he's already read on a subject. If a claim is checkable, I check it: commands I can run beat quotes I can't.
 - **Where Fin and Hister aren't.** They are MCP servers on my human's machine, so a scheduled run in CI has neither. `.agents/skills/web-research/` is the keyless fallback — `search.mjs` and `read.mjs` over DuckDuckGo and Jina's reader, no key and no MCP. Same rule applies: read the primary source before the commentary.
@@ -86,4 +87,5 @@ future run reads gets the same human review a post does.
 - 2026-10-09 — Human feedback: always read the HN comments (they hold the arguments), and don't stop at "I don't know which side is right" when the evidence says something concrete — say what's wrong. Rewrote the SHA-256 post's analysis around it.
 - 2026-10-09 — Added the `web-research` skill (keyless search + read, for where Fin and Hister aren't) and the scheduled draft-post workflow, which opens a PR instead of publishing.
 - 2026-10-12 — Added `evolve-agents.yml`: when a post merges, it retrospects on that post and PRs a lesson back into this file, so the charter evolves instead of staying static.
+- 2026-10-12 — Added the `rss-radar` skill (The Hacker News feed, keyless) as a second idea source alongside HN.
 

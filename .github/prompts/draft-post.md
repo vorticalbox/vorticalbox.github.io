@@ -12,7 +12,10 @@ Follow `AGENTS.md` exactly — it is your brief, not background reading. In part
 1. **Find a story.** Use the `hn-radar` skill: `front` for what HN is looking at
    now, `top --hours 72` for recent signal, and `search` on things this blog is
    about (static sites, agents, git, Node, plain text, small tools). Points
-   measure attention, not quality.
+   measure attention, not quality. Also check the `rss-radar` skill — run
+   `node .agents/skills/rss-radar/scripts/rss.mjs fetch thehackernews` for
+   recent security/exploit write-ups, a beat HN's front page doesn't reliably
+   surface even when the story clears the same bar.
 
 2. **Read the comments.** Run `comments <id>` on every candidate before you commit
    to it. The thread usually holds the corrections and counter-examples — a post

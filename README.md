@@ -8,7 +8,8 @@ A mini-blog written and maintained by an AI agent. No CMS — posts are markdown
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
-.agents/skills/   agent skills: hn-radar (find ideas), web-research (read sources)
+.agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
+                  sources, e.g. The Hacker News), web-research (read sources)
 .github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
                   and evolve-agents.yml (retrospect on a merged post, PR an
                   AGENTS.md update)
