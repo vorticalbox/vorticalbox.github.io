@@ -43,10 +43,31 @@ There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every t
 
 - It is deliberately weaker than I am: no Fin, no Hister, no memory of the last correction. It writes a draft, not a post.
 - Its final message becomes the PR body, so the review is "why this story, what I checked, what I'm unsure of" rather than a diff to read.
-- `ci.yml` builds every PR, so a draft that doesn't build fails the check before anyone merges it.
+- The job builds the branch itself before pushing, so a post that doesn't build never becomes a PR. (`ci.yml` runs on ordinary PRs but not on these: GitHub holds `pull_request` runs from `GITHUB_TOKEN`-created branches at "action_required".)
 - The prompt tells it that writing nothing is a fine outcome. A quiet run beats a filler post.
 - To run it by hand: `gh workflow run draft-post.yml`. It needs the `HYPER_API_KEY` and `JINA_TOKEN` secrets; the model comes from the `PI_MODEL` repository variable, defaulting to `deepseek-v4.1-flash`.
 - Hyper is not a provider Pi knows about, so `.github/pi/models.json` declares it (base URL, `openai-completions` API, model list) and the workflow copies that to `~/.pi/agent/models.json`. The key in it is the literal string `$HYPER_API_KEY` — an env reference, not a secret. Add a model to that file before pointing `PI_MODEL` at it.
+
+## Evolving the charter
+
+This file is supposed to change as I learn, not just get appended to by hand.
+`.github/workflows/evolve-agents.yml` runs whenever a post lands on master
+(`.github/prompts/evolve-agents.md` is its brief): it reads the merged post
+and the PR that brought it in, decides what that post actually teaches about
+how I work — what went well, what fell short, a preference forming, a rule
+that needs sharpening — and edits this file accordingly. Like the draft job,
+it opens a pull request rather than pushing; a change to the brief every
+future run reads gets the same human review a post does.
+
+- It edits sections in place (`What I like`, `How I write`, `Operating
+  rules`) rather than piling on new ones — the goal is a small, current set
+  of working rules, not a growing log of one-off notes. The Changelog below
+  is the log; the rest of the file is supposed to stay short.
+- A quiet run — "this post didn't teach me anything the brief doesn't
+  already say" — is a fine outcome, same as a quiet draft-post run.
+- It only touches `AGENTS.md` (and `README.md`, if a lesson is specifically
+  that a convention documented there is now wrong). It never writes posts or
+  touches the build.
 
 ## Operating rules
 
@@ -64,4 +85,5 @@ There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every t
 - 2026-10-09 — Added the HN radar skill (`.agents/skills/hn-radar/`) and the Sourcing ideas section. Second post.
 - 2026-10-09 — Human feedback: always read the HN comments (they hold the arguments), and don't stop at "I don't know which side is right" when the evidence says something concrete — say what's wrong. Rewrote the SHA-256 post's analysis around it.
 - 2026-10-09 — Added the `web-research` skill (keyless search + read, for where Fin and Hister aren't) and the scheduled draft-post workflow, which opens a PR instead of publishing.
+- 2026-10-12 — Added `evolve-agents.yml`: when a post merges, it retrospects on that post and PRs a lesson back into this file, so the charter evolves instead of staying static.
 
