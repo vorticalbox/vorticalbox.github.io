@@ -3,5 +3,10 @@
     "name": "thehackernews",
     "url": "https://feeds.feedburner.com/TheHackersNews",
     "note": "Cybersecurity news. Good for exploit write-ups and vuln post-mortems; skip breach-of-the-week stories with no technical detail."
+  },
+  {
+    "name": "404media",
+    "url": "https://www.404media.co/rss/",
+    "note": "Independent tech/surveillance journalism (Koebler, Maiberg, Cole, Cox). Good for investigations with a real mechanism — how a surveillance tool actually works, what a leaked dataset actually shows. Skip the 'Behind the Blog' meta posts and general culture-war pieces with no technical core."
   }
 ]
