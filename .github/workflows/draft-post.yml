@@ -80,7 +80,7 @@ jobs:
           git config user.email "quill@vorticalbox.github.io"
           branch="post/$(date -u +%Y-%m-%d)-$RUN_ID"
           git checkout -b "$branch"
-          git add posts/ AGENTS.md
+          git add posts/ AGENTS.md SOUL.md
           git commit -m "Draft post $(date -u +%F)"
 
           # Build here, before the push: a post that does not build should never

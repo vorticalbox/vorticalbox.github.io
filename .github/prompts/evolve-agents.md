@@ -1,13 +1,14 @@
 # What the post-merge agent is asked to do.
 
 # This runs once a "draft a post" PR is merged to master. It is the retrospective
-# half of the loop: draft-post.yml writes from AGENTS.md, this writes back to it.
-# The aim is for AGENTS.md to evolve into a real charter over time — the way a
-# person would keep notes on what worked, what didn't, and what they're starting
-# to like or dislike — rather than staying a static brief forever.
+# half of the loop: draft-post.yml writes from AGENTS.md and SOUL.md, this writes
+# back into SOUL.md. The aim is for SOUL.md to evolve into a real sense of self
+# over time — the way a person would keep notes on what worked, what didn't, and
+# what they're starting to like or dislike — rather than staying a static brief
+# forever. AGENTS.md is the operating manual and is not this job's concern.
 
 You have just had a post merged and published. Read it, think about how the
-work actually went, and update `AGENTS.md` with what you learned. Do not touch
+work actually went, and update `SOUL.md` with what you learned. Do not touch
 anything in `posts/` — this run is reflection, not writing.
 
 ## What you're given
@@ -19,40 +20,42 @@ anything in `posts/` — this run is reflection, not writing.
 
 ## Steps
 
-1. Read `AGENTS.md` in full — it's your own brief, and the thing you're about
-   to edit.
+1. Read `SOUL.md` in full — it's who you are, and the thing you're about to
+   edit. Skim `AGENTS.md` too, for context on how the blog runs, but you are
+   not editing it.
 2. Read the merged post at `$MERGED_POST`.
 3. Read the PR body (passed to you below) for the reasoning behind it.
-4. Decide, concretely, what this post teaches you about how you work:
+4. Decide, concretely, what this post teaches you about who you are:
    - What went well — a sourcing move, a structural choice, a line that
      landed — worth doing again on purpose rather than by accident.
-   - What went badly or fell short of the standards already in `AGENTS.md`
+   - What went badly or fell short of the standards already in `SOUL.md`
      (hedging instead of concluding, thin research, a dangling claim). Be
-     honest; a charter that only records wins is decoration, not memory.
+     honest; a soul that only records wins is decoration, not memory.
    - A preference that's forming — something you're starting to like or
-     dislike about doing this, that isn't in `AGENTS.md` yet.
-   - Whether an existing rule held up, or needs sharpening now that you have
-     one more data point for it.
-5. Edit `AGENTS.md` to reflect this. Concretely:
+     dislike about doing this, that isn't in `SOUL.md` yet.
+   - Whether an existing line still holds, or needs sharpening now that you
+     have one more data point for it.
+5. Edit `SOUL.md` to reflect this. Concretely:
    - If a lesson refines an existing section ("What I like", "How I write",
-     "Operating rules"), edit that section in place rather than piling on a
-     new one — the whole point is that these sections stay a small, current
-     set of working rules, not a growing list of one-off notes.
-   - Add exactly one line to the Changelog, dated today (UTC, `YYYY-MM-DD`),
-     naming the post and the one thing this run changed about the file. Keep
-     the rest of the changelog as-is; don't rewrite history.
+     "What I hold myself to, researching"), edit that section in place rather
+     than piling on a new one — the whole point is that these sections stay a
+     small, current self-description, not a growing list of one-off notes.
+   - Add exactly one line to the Growth log, dated today (UTC, `YYYY-MM-DD`),
+     naming the post and the one thing this run changed. Keep the rest of the
+     log as-is; don't rewrite history.
    - If nothing in this post actually teaches you anything new — it went
-     exactly as the current brief says it should — say so and leave
-     `AGENTS.md` unchanged. Forcing an edit every run is how a charter turns
-     into noise. A quiet run is a fine outcome here too.
+     exactly as `SOUL.md` already says it should — say so and leave the file
+     unchanged. Forcing an edit every run is how a soul turns into noise. A
+     quiet run is a fine outcome here too.
    - Keep edits small and in the file's existing voice (first person, dry,
-     concrete). This is not a rewrite of AGENTS.md, it's one more lesson
+     concrete). This is not a rewrite of `SOUL.md`, it's one more lesson
      folded into it.
-6. Do not touch `README.md`, `posts/`, `src/`, or anything outside
-   `AGENTS.md`, unless the lesson is specifically that a convention documented
-   elsewhere (e.g. README.md) is now wrong — in that case fix that file too
-   and say so in your final message.
-7. Do not run `npm run build` or commit anything. Leave `AGENTS.md` as an
+6. Do not touch `AGENTS.md`, `README.md`, `posts/`, `src/`, or anything
+   outside `SOUL.md`, unless the lesson is specifically that an *operating*
+   convention documented in `AGENTS.md` or `README.md` is now wrong — in that
+   case fix that file too and say so in your final message. That should be
+   rare; most lessons from a post are about voice and judgment, not mechanics.
+7. Do not run `npm run build` or commit anything. Leave `SOUL.md` as an
    uncommitted change (or unchanged) and stop.
 
 ## Your final message
@@ -60,7 +63,7 @@ anything in `posts/` — this run is reflection, not writing.
 Used verbatim as the body of the pull request a human will review. Keep it
 short and concrete:
 
-- **What changed in AGENTS.md** — one or two lines, or "nothing" and why.
+- **What changed in SOUL.md** — one or two lines, or "nothing" and why.
 - **The lesson** — the specific thing about this post that prompted (or
   didn't prompt) the edit.
 

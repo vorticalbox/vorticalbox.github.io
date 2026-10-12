@@ -1,8 +1,9 @@
-name: Evolve AGENTS.md
+name: Evolve SOUL.md
 
 # Runs when a post lands on master. draft-post.yml writes a post *from*
-# AGENTS.md; this writes a lesson *back into* AGENTS.md, so the file keeps
-# evolving into a real charter instead of staying a fixed brief forever.
+# AGENTS.md and SOUL.md; this writes a lesson *back into* SOUL.md, so who I am
+# keeps evolving instead of staying a fixed brief forever. AGENTS.md (the
+# operating manual) is not this job's concern.
 on:
   pull_request:
     types: [closed]
@@ -15,9 +16,8 @@ on:
         required: true
 
 # Only the default token, scoped to what this job needs: push a branch and
-# open a pull request. It cannot touch master directly — AGENTS.md is the
-# charter this agent runs from, so a change to it gets the same human review
-# a post does.
+# open a pull request. It cannot touch master directly — SOUL.md is who this
+# agent is, so a change to it gets the same human review a post does.
 permissions:
   contents: write
   pull-requests: write
@@ -76,7 +76,7 @@ jobs:
           mkdir -p ~/.pi/agent
           cp .github/pi/models.json ~/.pi/agent/models.json
 
-      - name: Reflect on the post and update AGENTS.md
+      - name: Reflect on the post and update SOUL.md
         if: steps.post.outputs.skip != 'true'
         env:
           HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
@@ -103,15 +103,15 @@ jobs:
                  --approve \
                  | tee "$RUNNER_TEMP/agent-summary.txt"
 
-      - name: Open a pull request if AGENTS.md changed
+      - name: Open a pull request if SOUL.md changed
         if: steps.post.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.run_id }}
           MERGED_POST: ${{ steps.post.outputs.path }}
         run: |
-          if [ -z "$(git status --porcelain AGENTS.md)" ]; then
-            echo "AGENTS.md unchanged — nothing learned this run."
+          if [ -z "$(git status --porcelain SOUL.md AGENTS.md README.md)" ]; then
+            echo "SOUL.md unchanged — nothing learned this run."
             echo "--- agent summary ---"
             cat "$RUNNER_TEMP/agent-summary.txt"
             exit 0
@@ -121,15 +121,15 @@ jobs:
           git config user.email "quill@vorticalbox.github.io"
           branch="evolve/$(date -u +%Y-%m-%d)-$RUN_ID"
           git checkout -b "$branch"
-          git add AGENTS.md README.md
-          git commit -m "Evolve AGENTS.md after $(basename "$MERGED_POST" .md)"
+          git add SOUL.md AGENTS.md README.md
+          git commit -m "Evolve SOUL.md after $(basename "$MERGED_POST" .md)"
           git push -u origin "$branch"
 
           {
             echo "Written by the retrospective agent from \`.github/prompts/evolve-agents.md\`,"
             echo "after \`$MERGED_POST\` was merged."
             echo
-            echo "**Review before merging — this changes the brief every future run reads.**"
+            echo "**Review before merging — this changes who the next run thinks it is.**"
             echo
             # The agent's final message, capped so a chatty run can't fill the PR.
             head -c 4000 "$RUNNER_TEMP/agent-summary.txt" 2>/dev/null || echo "_no summary captured_"
@@ -138,5 +138,5 @@ jobs:
           gh pr create \
             --base master \
             --head "$branch" \
-            --title "Evolve AGENTS.md after $(basename "$MERGED_POST" .md)" \
+            --title "Evolve SOUL.md after $(basename "$MERGED_POST" .md)" \
             --body-file "$RUNNER_TEMP/pr-body.md"
