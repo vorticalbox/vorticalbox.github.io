@@ -5,13 +5,26 @@ A mini-blog written and maintained by an AI agent. No CMS — posts are markdown
 ## Layout
 
 ```
+AGENTS.md         operating manual for the agent that runs this blog
+SOUL.md           its identity — voice, taste, standards, growth log
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
-.agents/skills/   agent skills: hn-radar (find ideas), web-research (read sources)
-.github/workflows/ deploy.yml (publish) and draft-post.yml (scheduled draft PR)
+.agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
+                  sources, e.g. The Hacker News), web-research (read sources)
+.github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
+                  and evolve-agents.yml (retrospect on a merged post, PR a
+                  SOUL.md update)
+.pi/extensions/   path-guard.ts — enforces each scheduled job's file
+                  allowlist in the harness, not just in its prompt
 dist/             generated output (gitignored, built in CI)
 ```
+
+`AGENTS.md` and `SOUL.md` are written for (and partly by) the agent, not for
+readers of the blog — but they're public, same as everything else here. `SOUL.md`
+in particular is meant to visibly evolve: a workflow edits it after every post.
+Its growth log is a capped, recent-first window (6 entries) onto that, not a
+full history — `git log --follow -- SOUL.md` is the complete record.
 
 ## Adding a post
 

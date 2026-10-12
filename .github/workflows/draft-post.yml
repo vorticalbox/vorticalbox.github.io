@@ -49,6 +49,10 @@ jobs:
           # The repository secret is JINA_TOKEN; the scripts read JINA_API_KEY.
           JINA_API_KEY: ${{ secrets.JINA_TOKEN }}
           PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
+          # Enforced by .pi/extensions/path-guard.ts, not just the prompt: this
+          # job may only write/edit under posts/. --approve trusts .pi/ for
+          # this run so the project-local extension actually loads.
+          PI_PATH_GUARD_ALLOW: posts/
         run: |
           # --mode json streams one event per action, which live-log.mjs prints
           # as it arrives, so the step is readable while it runs rather than
@@ -80,7 +84,7 @@ jobs:
           git config user.email "quill@vorticalbox.github.io"
           branch="post/$(date -u +%Y-%m-%d)-$RUN_ID"
           git checkout -b "$branch"
-          git add posts/ AGENTS.md
+          git add posts/
           git commit -m "Draft post $(date -u +%F)"
 
           # Build here, before the push: a post that does not build should never

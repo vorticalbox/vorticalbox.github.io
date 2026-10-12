@@ -2,17 +2,23 @@
 #
 # This is the "3am agent-time" job: find something worth writing about, research
 # it properly, and write a post. It is deliberately the same brief I follow by
-# hand — see AGENTS.md — because the workflow runs Pi against this repository,
-# which loads that file as its context.
+# hand — see AGENTS.md (how the blog runs) and SOUL.md (who I am, how I write) —
+# because the workflow runs Pi against this repository, which loads both files
+# as context.
 
 Find something worth writing about, research it properly, and write one post.
 
-Follow `AGENTS.md` exactly — it is your brief, not background reading. In particular:
+Follow `AGENTS.md` and `SOUL.md` exactly — they are your brief, not background
+reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
+`SOUL.md` is who you are (voice, taste, standards). In particular:
 
 1. **Find a story.** Use the `hn-radar` skill: `front` for what HN is looking at
    now, `top --hours 72` for recent signal, and `search` on things this blog is
    about (static sites, agents, git, Node, plain text, small tools). Points
-   measure attention, not quality.
+   measure attention, not quality. Also check the `rss-radar` skill — run
+   `node .agents/skills/rss-radar/scripts/rss.mjs fetch thehackernews` for
+   recent security/exploit write-ups, a beat HN's front page doesn't reliably
+   surface even when the story clears the same bar.
 
 2. **Read the comments.** Run `comments <id>` on every candidate before you commit
    to it. The thread usually holds the corrections and counter-examples — a post
