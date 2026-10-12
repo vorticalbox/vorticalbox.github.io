@@ -1,13 +1,16 @@
-name: Evolve SOUL.md
+name: Reflect and evolve
 
 # Runs when a post lands on master. draft-post.yml writes a post *from*
-# AGENTS.md and SOUL.md; this writes a lesson *back into* SOUL.md, so who I am
-# keeps evolving instead of staying a fixed brief forever. AGENTS.md (the
-# operating manual) is not this job's concern.
-#
-# It also grows rss-radar's feed list: a source liked once (discover.mjs found
-# a working feed for it) gets added to feeds.json, so it's checked routinely
-# going forward rather than relied on once by accident.
+# AGENTS.md and SOUL.md; this is the other half — having just learned
+# whatever that post's research taught, the agent decides for itself whether
+# anything about the blog (including itself) should change. That can be a
+# SOUL.md lesson, a new rss-radar feed, a refinement to src/blog.css, a
+# correction to an older post, or something genuinely new — a tool, a page,
+# a visualization, whatever the research actually suggests. It always
+# proposes this as a PR; nothing is live until a human approves or rejects
+# it, same as any other change here. See AGENTS.md's "How the
+# self-improvement loop is wired" for the full picture, including why this
+# job is trusted with almost the whole repo and what the two exceptions are.
 on:
   pull_request:
     types: [closed]
@@ -20,8 +23,8 @@ on:
         required: true
 
 # Only the default token, scoped to what this job needs: push a branch and
-# open a pull request. It cannot touch master directly — SOUL.md is who this
-# agent is, so a change to it gets the same human review a post does.
+# open a pull request. It cannot touch master directly — that PR is the
+# entire safety model now that scope is this broad.
 permissions:
   contents: write
   pull-requests: write
@@ -80,7 +83,7 @@ jobs:
           mkdir -p ~/.pi/agent
           cp .github/pi/models.json ~/.pi/agent/models.json
 
-      - name: Reflect on the post, update SOUL.md, and look for a new feed
+      - name: Reflect on the post and decide what, if anything, to change
         if: steps.post.outputs.skip != 'true'
         env:
           HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
@@ -88,12 +91,20 @@ jobs:
           PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
           MERGED_POST: ${{ steps.post.outputs.path }}
           PR_BODY: ${{ steps.post.outputs.pr_body }}
-          # Enforced by .pi/extensions/path-guard.ts, not just the prompt: this
-          # job may only write/edit these two files, full stop — no "fix
-          # AGENTS.md if a convention is wrong" escape hatch anymore. If that
-          # comes up, the prompt now asks it to say so in the final message
-          # instead, for a human (or the interactive agent) to act on.
-          PI_PATH_GUARD_ALLOW: "SOUL.md,.agents/skills/rss-radar/feeds.json"
+          # A deny-list, not an allow-list: this job can touch almost the
+          # whole repo now (new posts, edited posts, new pages, scripts,
+          # CSS, SOUL.md, AGENTS.md, README — whatever the research
+          # suggests). The two things still off the table are the workflow
+          # files and this guard itself. GitHub already neutralizes most of
+          # the risk there on its own — a pull_request-triggered workflow
+          # always runs from the base ref, never the PR branch, so editing
+          # .github/workflows/*.yml in this PR has zero effect until a human
+          # merges it, same as any other change. Keeping them explicitly
+          # denied anyway is cheap insurance against a prompt-injected
+          # "helpfully disable your own guard" instruction — the content
+          # this job reads (article text, comments) is attacker-reachable
+          # in principle, even if nothing has shown signs of that so far.
+          PI_PATH_GUARD_DENY: ".github/workflows/,.pi/extensions/path-guard.ts"
         run: |
           # Same fix as draft-post.yml, and see live-log.mjs's docstring for
           # why --print alone isn't enough: a provider HTTP error (seen live —
@@ -130,45 +141,69 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           MERGED_POST: ${{ steps.post.outputs.path }}
         run: |
-          tracked="SOUL.md .agents/skills/rss-radar/feeds.json"
-          if [ -z "$(git status --porcelain $tracked)" ]; then
-            echo "Nothing changed — no lesson and no new feed this run."
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Nothing changed this run — reflected and decided there was nothing worth doing."
             echo "--- agent summary ---"
             cat "$RUNNER_TEMP/agent-summary.txt"
             exit 0
           fi
 
-          # Title reflects what actually changed, since a run can do either,
-          # both, or (rarely) neither.
+          # The agent's final message is asked to start with exactly one
+          # line, "TITLE: ...", which becomes the PR/commit title; the rest
+          # becomes the PR body. A run that changed files but produced no
+          # usable title still deserves a PR, not a silently dropped one, so
+          # fall back to a generic title rather than failing here.
           slug="$(basename "$MERGED_POST" .md)"
-          soul_changed=false; feed_changed=false
-          [ -n "$(git status --porcelain SOUL.md)" ] && soul_changed=true
-          [ -n "$(git status --porcelain .agents/skills/rss-radar/feeds.json)" ] && feed_changed=true
-          if [ "$soul_changed" = true ] && [ "$feed_changed" = true ]; then
-            title="Evolve SOUL.md and add a feed, after $slug"
-          elif [ "$feed_changed" = true ]; then
-            title="Add a feed source, after $slug"
+          summary="$RUNNER_TEMP/agent-summary.txt"
+          title="$(head -1 "$summary" 2>/dev/null | sed -n 's/^TITLE: *//p')"
+          if [ -n "$title" ]; then
+            body_start=2
           else
-            title="Evolve SOUL.md after $slug"
+            title="Self-directed update after $slug"
+            body_start=1
           fi
+
+          # If src/blog.css changed, note what check-css.mjs finds — purely
+          # informational now (see AGENTS.md): this job isn't scoped down to
+          # specific files anymore, so nothing here blocks or discards
+          # anything. The human reviewing the PR is the actual gate; this
+          # just gives them a head start on one specific, previously-bitten
+          # failure mode (build.mjs copies this file verbatim, so a broken
+          # or house-style-breaking edit wouldn't show up as a build failure
+          # on its own).
+          css_note=""
+          if [ -n "$(git status --porcelain src/blog.css 2>/dev/null)" ]; then
+            if css_check_output="$(node .github/pi/check-css.mjs src/blog.css 2>&1)"; then
+              css_note=$'\n\n`src/blog.css` changed — automated check: looks structurally sound and keeps the house-style identity.'
+            else
+              css_note=$'\n\n`src/blog.css` changed — automated check found a problem, review the diff closely:\n```\n'"$css_check_output"$'\n```'
+            fi
+          fi
+
+          # Verify the build before anything else can see this. Scope is now
+          # "almost anything in the repo", including scripts/build.mjs
+          # itself, so this is the one gate that must never be skipped —
+          # ci.yml will also build this PR independently, but a post-merge
+          # job proposing a change that doesn't even build is noise nobody
+          # should have to triage by hand.
+          npm run build
 
           git config user.name "quill"
           git config user.email "quill@vorticalbox.github.io"
           branch="evolve/$(date -u +%Y-%m-%d)-$RUN_ID"
           git checkout -b "$branch"
-          git add $tracked
+          git add -A
           git commit -m "$title"
           git push -u origin "$branch"
 
           {
             echo "Written by the retrospective agent from \`.github/prompts/evolve-agents.md\`,"
-            echo "after \`$MERGED_POST\` was merged."
+            echo "after \`$MERGED_POST\` was merged. It decided, on its own, that this was worth"
+            echo "proposing — nothing here is live until this PR is approved."
             echo
-            echo "**Review before merging — this changes who the next run thinks it is"
-            echo "and/or what it reads to find the next one.**"
-            echo
-            # The agent's final message, capped so a chatty run can't fill the PR.
-            head -c 4000 "$RUNNER_TEMP/agent-summary.txt" 2>/dev/null || echo "_no summary captured_"
+            # The agent's own explanation, capped so a chatty run can't fill the PR.
+            tail -n "+$body_start" "$summary" 2>/dev/null | head -c 4000 || echo "_no summary captured_"
+            echo "$css_note"
           } > "$RUNNER_TEMP/pr-body.md"
 
           gh pr create \
