@@ -11,8 +11,19 @@
  * It also fixes a worse problem: the step that opens the PR decides whether to
  * act by looking at `git status`. An agent that crashed and an agent that
  * deliberately wrote nothing both leave no changes, so a broken run used to
- * report success. Run this under `set -o pipefail` so Pi's exit code fails the
- * step, and a crash can no longer masquerade as a quiet run.
+ * report success. Run this under `set -o pipefail` so a failure here fails
+ * the step, and a crash can no longer masquerade as a quiet run.
+ *
+ * That "run this under pipefail" half is necessary but not sufficient: `pi`
+ * itself exits 0 even when the model call failed outright (checked directly —
+ * a provider returning an HTTP error page still produces a well-formed
+ * `message_end` event with `stopReason: "error"` and an empty content array,
+ * and `pi`'s own process exit code is 0 regardless). Left unchecked, that
+ * error event just looks like a turn that produced no final text — which,
+ * same as before, is indistinguishable from a deliberately quiet run. So this
+ * script watches for `stopReason: "error"` itself and sets its *own* exit
+ * code to 1 when the last thing the agent did was fail, which is what
+ * `pipefail` actually needs to have something real to propagate.
  *
  * Usage:  pi --mode json ... | node live-log.mjs <summary-output-path>
  */
@@ -33,6 +44,11 @@ function detail(args = {}) {
 let finalText = '';
 let toolCount = 0;
 const errors = [];
+// The most recent assistant turn's failure, if the agent ended on one. Reset
+// to null whenever a later turn produces real content, so a transient error
+// pi recovered from (it retried and got a good answer) is not treated as
+// fatal — only the state at the end of the stream matters.
+let lastError = null;
 
 const rl = createInterface({ input: process.stdin });
 rl.on('line', (line) => {
@@ -58,7 +74,14 @@ rl.on('line', (line) => {
 
     case 'message_end': {
       const m = ev.message;
-      if (m?.role === 'assistant' && Array.isArray(m.content)) {
+      if (m?.role !== 'assistant') break;
+      if (m.stopReason === 'error') {
+        lastError = m.errorMessage || '(no error message provided)';
+        process.stderr.write(`✗ model call failed: ${short(m.errorMessage, 300)}\n`);
+        break;
+      }
+      lastError = null; // this turn succeeded — any earlier error was recovered from
+      if (Array.isArray(m.content)) {
         const text = m.content
           .filter((b) => b.type === 'text')
           .map((b) => b.text)
@@ -72,10 +95,14 @@ rl.on('line', (line) => {
 });
 
 rl.on('close', () => {
-  process.stderr.write(`\n--- ${toolCount} tool call(s), ${errors.length} error(s) ---\n`);
+  process.stderr.write(`\n--- ${toolCount} tool call(s), ${errors.length} tool error(s) ---\n`);
   if (outPath) {
     writeFileSync(outPath, finalText ? `${finalText}\n` : '');
     process.stderr.write(`--- final message (${finalText.length} chars) -> ${outPath} ---\n`);
     if (!finalText) process.stderr.write('WARNING: no final assistant text was captured\n');
+  }
+  if (lastError) {
+    process.stderr.write(`\nFATAL: the run ended on a failed model call, not a deliberate quiet run:\n${lastError}\n`);
+    process.exitCode = 1;
   }
 });

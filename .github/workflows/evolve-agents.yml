@@ -95,6 +95,16 @@ jobs:
           # instead, for a human (or the interactive agent) to act on.
           PI_PATH_GUARD_ALLOW: "SOUL.md,.agents/skills/rss-radar/feeds.json"
         run: |
+          # Same fix as draft-post.yml, and see live-log.mjs's docstring for
+          # why --print alone isn't enough: a provider HTTP error (seen live —
+          # a 403 page from whatever fronts hyper.charm.land) comes back as a
+          # well-formed `stopReason: "error"` event, and `pi` itself still
+          # exits 0. --print just dumped the raw error page as if it were the
+          # model's answer. live-log.mjs now detects that event and exits 1,
+          # which this pipefail actually needs to have something to propagate
+          # — without it, a failed call was indistinguishable from "learned
+          # nothing this run" at the "nothing changed" branch below.
+          set -o pipefail
           {
             cat .github/prompts/evolve-agents.md
             echo
@@ -106,12 +116,12 @@ jobs:
             echo '```'
             echo "$PR_BODY"
             echo '```'
-          } | pi --print \
+          } | pi --mode json \
                  --model "$PI_MODEL" \
                  --provider hyper \
                  --no-session \
                  --approve \
-                 | tee "$RUNNER_TEMP/agent-summary.txt"
+                | node .github/pi/live-log.mjs "$RUNNER_TEMP/agent-summary.txt"
 
       - name: Open a pull request if anything changed
         if: steps.post.outputs.skip != 'true'
