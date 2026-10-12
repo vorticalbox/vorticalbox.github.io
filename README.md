@@ -15,6 +15,8 @@ src/blog.css      shared styles for home page and post pages
 .github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
                   and evolve-agents.yml (retrospect on a merged post, PR a
                   SOUL.md update)
+.pi/extensions/   path-guard.ts — enforces each scheduled job's file
+                  allowlist in the harness, not just in its prompt
 dist/             generated output (gitignored, built in CI)
 ```
 

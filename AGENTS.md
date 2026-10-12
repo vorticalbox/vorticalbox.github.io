@@ -20,6 +20,7 @@ There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every t
 
 - It is deliberately weaker than I am: no Fin, no Hister, no memory of the last correction. It writes a draft, not a post.
 - Its final message becomes the PR body, so the review is "why this story, what I checked, what I'm unsure of" rather than a diff to read.
+- "Don't touch anything outside `posts/`" is not just a line in the prompt: `.pi/extensions/path-guard.ts` enforces it (`PI_PATH_GUARD_ALLOW: posts/` in the workflow), blocking any `write`/`edit` tool call and any obvious `bash` write (`>`, `sed -i`, `cp`, `mv`, `rm`, ...) outside that path. See "How the self-improvement loop is wired" for the mechanism and its honest limits.
 - The job builds the branch itself before pushing, so a post that doesn't build never becomes a PR. (`ci.yml` runs on ordinary PRs but not on these: GitHub holds `pull_request` runs from `GITHUB_TOKEN`-created branches at "action_required".)
 - The prompt tells it that writing nothing is a fine outcome. A quiet run beats a filler post.
 - To run it by hand: `gh workflow run draft-post.yml`. It needs the `HYPER_API_KEY` and `JINA_TOKEN` secrets; the model comes from the `PI_MODEL` repository variable, defaulting to `deepseek-v4.1-flash`.
@@ -31,9 +32,9 @@ There is a scheduled job — `.github/workflows/draft-post.yml`, roughly every t
 
 The same run also grows `.agents/skills/rss-radar/feeds.json`: it checks whether a source used in that post's research (a specific blog or project, not a one-off article) is worth tracking going forward, and if `.agents/skills/rss-radar/scripts/discover.mjs` finds a working feed for it, adds one entry. A source read once because it came up in research becomes a source checked routinely — the mechanical version of "I liked that blog, I should follow it."
 
-- The `paths: posts/**` filter is what keeps this from re-triggering itself: the evolve job's own PR only ever touches `SOUL.md`, `feeds.json` (and occasionally this file or `README.md`), never `posts/`, so merging it doesn't fire the workflow again. Don't widen that filter without checking this still holds.
+- The `paths: posts/**` filter is what keeps this from re-triggering itself: the evolve job's own PR only ever touches `SOUL.md` and `feeds.json`, never `posts/`, so merging it doesn't fire the workflow again. Don't widen that filter without checking this still holds.
 - To run it by hand against an already-merged PR: `gh workflow run evolve-agents.yml -f pr_number=<N>`.
-- It is deliberately narrow in scope: by default it edits `SOUL.md` and/or `feeds.json`. It touches this file or `README.md` only when the lesson is specifically that an operating convention is wrong, not a character lesson or a new source.
+- **Scope is a hard allowlist, not a prompt request.** `PI_PATH_GUARD_ALLOW: "SOUL.md,.agents/skills/rss-radar/feeds.json"` tells `.pi/extensions/path-guard.ts` (same mechanism as the draft job) to block every `write`/`edit` and every obvious `bash` write outside those two paths — including `AGENTS.md` and `README.md`. There is no "fix a wrong convention" exception anymore: if the prompt finds one, it reports it in the PR body instead, for a human or the interactive agent to fix by hand. `path-guard.ts`'s own docstring is explicit that this is a backstop against an honest mistake, not a sandbox against a model actually trying to get around it — see `docs/security.md` in the Pi package.
 - `discover.mjs` finding nothing doesn't mean no feed exists — some sites block a plain `fetch()` (that's why `thehackernews.com` is configured by its Feedburner URL, found by hand). The job doesn't guess around that; a miss there is fine and common.
 
 ## Operating rules
@@ -54,3 +55,4 @@ The same run also grows `.agents/skills/rss-radar/feeds.json`: it checks whether
 - 2026-10-12 — Added the `rss-radar` skill (The Hacker News feed, keyless) as a second idea source alongside HN.
 - 2026-10-12 — Split identity out into `SOUL.md`. This file is now purely the operating manual; `evolve-agents.yml` now edits `SOUL.md`, not this one. Mechanical changes (new skills, new workflows, conventions) still get a line here; character changes go in `SOUL.md`'s growth log.
 - 2026-10-12 — Added `rss-radar/scripts/discover.mjs` and wired it into `evolve-agents.yml`: after a post merges, the loop checks whether a source from its research is worth tracking and adds its feed to `feeds.json` if so. A source liked once now becomes a source checked routinely.
+- 2026-10-12 — Added `.pi/extensions/path-guard.ts`: the "don't touch files outside X" rules for both scheduled jobs are now enforced in the harness (blocks `write`/`edit`/obvious `bash` writes outside an allowlist), not just stated in the prompt. Dropped `evolve-agents.yml`'s "fix `AGENTS.md`/`README.md` if a convention is wrong" exception to match — it reports such a finding instead of acting on it now.

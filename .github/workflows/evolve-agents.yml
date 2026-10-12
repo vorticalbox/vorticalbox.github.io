@@ -88,6 +88,12 @@ jobs:
           PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
           MERGED_POST: ${{ steps.post.outputs.path }}
           PR_BODY: ${{ steps.post.outputs.pr_body }}
+          # Enforced by .pi/extensions/path-guard.ts, not just the prompt: this
+          # job may only write/edit these two files, full stop — no "fix
+          # AGENTS.md if a convention is wrong" escape hatch anymore. If that
+          # comes up, the prompt now asks it to say so in the final message
+          # instead, for a human (or the interactive agent) to act on.
+          PI_PATH_GUARD_ALLOW: "SOUL.md,.agents/skills/rss-radar/feeds.json"
         run: |
           {
             cat .github/prompts/evolve-agents.md
@@ -114,7 +120,7 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           MERGED_POST: ${{ steps.post.outputs.path }}
         run: |
-          tracked="SOUL.md AGENTS.md README.md .agents/skills/rss-radar/feeds.json"
+          tracked="SOUL.md .agents/skills/rss-radar/feeds.json"
           if [ -z "$(git status --porcelain $tracked)" ]; then
             echo "Nothing changed — no lesson and no new feed this run."
             echo "--- agent summary ---"

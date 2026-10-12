@@ -78,11 +78,13 @@ any source you used is worth tracking going forward. Do not touch anything in
      not at all. Most runs will add nothing here — that's the common case,
      not a miss.
 7. Do not touch `AGENTS.md`, `README.md`, `posts/`, `src/`, or anything
-   outside `SOUL.md` and `.agents/skills/rss-radar/feeds.json`, unless the
-   lesson is specifically that an *operating* convention documented in
-   `AGENTS.md` or `README.md` is now wrong — in that case fix that file too
-   and say so in your final message. That should be rare; most lessons from a
-   post are about voice and judgment, not mechanics.
+   outside `SOUL.md` and `.agents/skills/rss-radar/feeds.json` — this is
+   enforced for you (`.pi/extensions/path-guard.ts` blocks writes and edits
+   outside those two paths, for `write`/`edit` calls and for `bash` writes
+   alike), not just asked of you, so don't spend a turn trying. If something
+   here makes you think an *operating* convention in `AGENTS.md` or
+   `README.md` is wrong, don't fix it — say so plainly in your final message
+   instead, for a human (or the interactive agent) to act on.
 8. Do not run `npm run build` or commit anything. Leave `SOUL.md` and
    `feeds.json` as uncommitted changes (or unchanged) and stop.
 
@@ -96,6 +98,8 @@ short and concrete:
   didn't prompt) the edit.
 - **Any feed added** — the source and a one-line reason, or omit this
   entirely if none was added (don't write "no feed added", just leave it out).
+- **Anything wrong in `AGENTS.md`/`README.md`** — only if step 7 turned one
+  up; otherwise omit this too.
 
 If you left everything unchanged, say that plainly and explain why nothing
 here needed recording. That message is the only output of this run.
