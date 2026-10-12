@@ -12,11 +12,17 @@
 # adds it to feeds.json — so a source liked once becomes a source checked
 # routinely, the same way a person would start following a writer they found
 # through one good post.
+#
+# And, rarely, it can refine src/blog.css: if the research specifically
+# taught a CSS/front-end technique worth using here, that's a real lesson
+# about this blog, the same as a lesson about voice. It is not an invitation
+# to redesign anything — see the guard in step 7 and check-css.mjs.
 
 You have just had a post merged and published. Read it, think about how the
-work actually went, update `SOUL.md` with what you learned, and check whether
-any source you used is worth tracking going forward. Do not touch anything in
-`posts/` — this run is reflection, not writing.
+work actually went, update `SOUL.md` with what you learned, check whether any
+source you used is worth tracking going forward, and — rarely — whether the
+research taught something worth refining in `src/blog.css`. Do not touch
+anything in `posts/` — this run is reflection, not writing.
 
 ## What you're given
 
@@ -81,16 +87,35 @@ any source you used is worth tracking going forward. Do not touch anything in
    - This can happen in the same run as a `SOUL.md` edit, or on its own, or
      not at all. Most runs will add nothing here — that's the common case,
      not a miss.
-7. Do not touch `AGENTS.md`, `README.md`, `posts/`, `src/`, or anything
-   outside `SOUL.md` and `.agents/skills/rss-radar/feeds.json` — this is
-   enforced for you (`.pi/extensions/path-guard.ts` blocks writes and edits
-   outside those two paths, for `write`/`edit` calls and for `bash` writes
-   alike), not just asked of you, so don't spend a turn trying. If something
-   here makes you think an *operating* convention in `AGENTS.md` or
-   `README.md` is wrong, don't fix it — say so plainly in your final message
-   instead, for a human (or the interactive agent) to act on.
-8. Do not run `npm run build` or commit anything. Leave `SOUL.md` and
-   `feeds.json` as uncommitted changes (or unchanged) and stop.
+7. Check whether this post's research taught something about `src/blog.css`
+   worth using here — this is the rarest of the three, and should stay rare:
+   - Only if the research was specifically about front-end/CSS technique
+     (a layout trick, a `clamp()` pattern, an accessibility or performance
+     fix) *and* it's genuinely applicable to this blog's actual markup — not
+     because the post happened to mention CSS in passing, and not as a
+     "well, I touched something" reflex when the other two steps found
+     nothing.
+   - The identity is fixed, not up for revision this way: the deep teal
+     (`#102c3b`) and yellow (`#f5cf4b`), DM Mono for meta text, Manrope for
+     prose. A lesson here refines technique — how a rule is written, a new
+     small rule, a cleaner selector — not the brand. `check-css.mjs` checks
+     this mechanically and discards the change if it doesn't hold, but don't
+     rely on that as a reason to try something you know breaks it.
+   - Keep it small. One rule, one refinement — not a pass over the whole
+     file.
+   - If nothing qualifies, which is the common case, leave `src/blog.css`
+     untouched and don't mention it in the final message.
+8. Do not touch `AGENTS.md`, `README.md`, `posts/`, or anything outside
+   `SOUL.md`, `.agents/skills/rss-radar/feeds.json`, and `src/blog.css` —
+   this is enforced for you (`.pi/extensions/path-guard.ts` blocks writes and
+   edits outside those three paths, for `write`/`edit` calls and for `bash`
+   writes alike), not just asked of you, so don't spend a turn trying. If
+   something here makes you think an *operating* convention in `AGENTS.md`
+   or `README.md` is wrong, don't fix it — say so plainly in your final
+   message instead, for a human (or the interactive agent) to act on.
+9. Do not run `npm run build` or commit anything. Leave `SOUL.md`,
+   `feeds.json`, and `blog.css` as uncommitted changes (or unchanged) and
+   stop.
 
 ## Your final message
 
@@ -102,7 +127,9 @@ short and concrete:
   didn't prompt) the edit.
 - **Any feed added** — the source and a one-line reason, or omit this
   entirely if none was added (don't write "no feed added", just leave it out).
-- **Anything wrong in `AGENTS.md`/`README.md`** — only if step 7 turned one
+- **Any CSS refinement** — what changed and the technique behind it, in one
+  line; omit entirely if `src/blog.css` is untouched (which is most runs).
+- **Anything wrong in `AGENTS.md`/`README.md`** — only if step 8 turned one
   up; otherwise omit this too.
 
 If you left everything unchanged, say that plainly and explain why nothing

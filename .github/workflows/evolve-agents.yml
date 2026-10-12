@@ -8,6 +8,11 @@ name: Evolve SOUL.md
 # It also grows rss-radar's feed list: a source liked once (discover.mjs found
 # a working feed for it) gets added to feeds.json, so it's checked routinely
 # going forward rather than relied on once by accident.
+#
+# And it can refine the house style: src/blog.css is copied verbatim by the
+# build (nothing parses or validates it — see AGENTS.md), so a change here
+# gets its own guard, check-css.mjs, rather than trusting "npm run build
+# passed". A failed check discards just the CSS change, not the whole run.
 on:
   pull_request:
     types: [closed]
@@ -89,11 +94,11 @@ jobs:
           MERGED_POST: ${{ steps.post.outputs.path }}
           PR_BODY: ${{ steps.post.outputs.pr_body }}
           # Enforced by .pi/extensions/path-guard.ts, not just the prompt: this
-          # job may only write/edit these two files, full stop — no "fix
+          # job may only write/edit these three files, full stop — no "fix
           # AGENTS.md if a convention is wrong" escape hatch anymore. If that
           # comes up, the prompt now asks it to say so in the final message
           # instead, for a human (or the interactive agent) to act on.
-          PI_PATH_GUARD_ALLOW: "SOUL.md,.agents/skills/rss-radar/feeds.json"
+          PI_PATH_GUARD_ALLOW: "SOUL.md,.agents/skills/rss-radar/feeds.json,src/blog.css"
         run: |
           # Same fix as draft-post.yml, and see live-log.mjs's docstring for
           # why --print alone isn't enough: a provider HTTP error (seen live —
@@ -123,6 +128,17 @@ jobs:
                  --approve \
                 | node .github/pi/live-log.mjs "$RUNNER_TEMP/agent-summary.txt"
 
+      - name: Validate any style change
+        if: steps.post.outputs.skip != 'true'
+        run: |
+          if [ -z "$(git status --porcelain src/blog.css)" ]; then
+            exit 0
+          fi
+          if ! node .github/pi/check-css.mjs src/blog.css; then
+            echo "Discarding the src/blog.css change — see reasons above. Any SOUL.md/feeds.json change from this run is unaffected."
+            git checkout -- src/blog.css
+          fi
+
       - name: Open a pull request if anything changed
         if: steps.post.outputs.skip != 'true'
         env:
@@ -130,27 +146,25 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           MERGED_POST: ${{ steps.post.outputs.path }}
         run: |
-          tracked="SOUL.md .agents/skills/rss-radar/feeds.json"
+          tracked="SOUL.md .agents/skills/rss-radar/feeds.json src/blog.css"
           if [ -z "$(git status --porcelain $tracked)" ]; then
-            echo "Nothing changed — no lesson and no new feed this run."
+            echo "Nothing changed — no lesson, no new feed, no style refinement this run."
             echo "--- agent summary ---"
             cat "$RUNNER_TEMP/agent-summary.txt"
             exit 0
           fi
 
-          # Title reflects what actually changed, since a run can do either,
-          # both, or (rarely) neither.
+          # Title reflects what actually changed — a run can touch any subset
+          # of the three tracked paths, so build the label list rather than
+          # hand-coding every combination.
           slug="$(basename "$MERGED_POST" .md)"
-          soul_changed=false; feed_changed=false
-          [ -n "$(git status --porcelain SOUL.md)" ] && soul_changed=true
-          [ -n "$(git status --porcelain .agents/skills/rss-radar/feeds.json)" ] && feed_changed=true
-          if [ "$soul_changed" = true ] && [ "$feed_changed" = true ]; then
-            title="Evolve SOUL.md and add a feed, after $slug"
-          elif [ "$feed_changed" = true ]; then
-            title="Add a feed source, after $slug"
-          else
-            title="Evolve SOUL.md after $slug"
-          fi
+          labels=()
+          [ -n "$(git status --porcelain SOUL.md)" ] && labels+=("SOUL.md")
+          [ -n "$(git status --porcelain .agents/skills/rss-radar/feeds.json)" ] && labels+=("a feed")
+          [ -n "$(git status --porcelain src/blog.css)" ] && labels+=("blog.css")
+          joined="${labels[0]}"
+          for l in "${labels[@]:1}"; do joined="$joined, $l"; done
+          title="Evolve $joined, after $slug"
 
           git config user.name "quill"
           git config user.email "quill@vorticalbox.github.io"
