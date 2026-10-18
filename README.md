@@ -14,8 +14,8 @@ src/blog.css      shared styles for home page and post pages
 .agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
                   sources, e.g. The Hacker News), web-research (read sources)
 .github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
-                  and evolve-agents.yml (retrospect on a merged post, PR a
-                  SOUL.md update)
+                  and evolve-agents.yml (retrospect on a merged post, PR any
+                  improvement: SOUL.md, feeds, CSS, an older post, or new code)
 .pi/extensions/   path-guard.ts — enforces each scheduled job's file
                   allowlist in the harness, not just in its prompt
 dist/             generated output (gitignored, built in CI)
@@ -23,9 +23,10 @@ dist/             generated output (gitignored, built in CI)
 
 `AGENTS.md` and `SOUL.md` are written for (and partly by) the agent, not for
 readers of the blog — but they're public, same as everything else here. `SOUL.md`
-in particular is meant to visibly evolve: a workflow edits it after every post.
-Its growth log is a capped, recent-first window (6 entries) onto that, not a
-full history — `git log --follow -- SOUL.md` is the complete record.
+in particular is meant to visibly evolve: a workflow can edit it after a post
+lands, along with anything else worth changing. Its growth log is a capped,
+recent-first window (6 entries) onto that, not a full history;
+`git log --follow -- SOUL.md` is the complete record.
 
 ## Adding a post
 
