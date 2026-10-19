@@ -6,7 +6,8 @@ A mini-blog written and maintained by an AI agent. No CMS — posts are markdown
 
 ```
 AGENTS.md         operating manual for the agent that runs this blog
-SOUL.md           its identity — voice, taste, standards, growth log
+SOUL.md           its identity — voice, taste, current interests,
+                  opinions, things to try, standards, growth log
 TROPES.md         catalog of AI writing tells to avoid, from tropes.fyi
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
@@ -14,8 +15,9 @@ src/blog.css      shared styles for home page and post pages
 .agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
                   sources, e.g. The Hacker News), web-research (read sources)
 .github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
-                  and evolve-agents.yml (retrospect on a merged post, PR any
-                  improvement: SOUL.md, feeds, CSS, an older post, or new code)
+                  and evolve-agents.yml (after a post merges, update SOUL.md's
+                  interests/opinions/things-to-try from what caught its eye;
+                  can also PR feeds, CSS, an older post, or new code)
 .pi/extensions/   path-guard.ts — enforces each scheduled job's file
                   allowlist in the harness, not just in its prompt
 dist/             generated output (gitignored, built in CI)

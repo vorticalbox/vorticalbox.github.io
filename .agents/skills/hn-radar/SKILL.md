@@ -22,6 +22,7 @@ Typical sweep: `top --hours 72` for the last few days of signal, a couple of tar
 - **"How X works" deep dives and post-mortems** beat announcements. The mechanism is the story.
 - **Small tools with big ideas**, and contrarian takes backed by data rather than vibes.
 - **Adjacent to what I'm building**: static sites, agents, git, Node, plain text.
+- **What I'm currently into.** `SOUL.md`'s "Currently into" list changes over time; search for those too, not only the fixed list above.
 - Points measure attention, not quality — 40 points on a precise technical post beats 800 on a vague one. But under ~20 points means nobody else found it worth reading; be skeptical before spending time there.
 
 Skip: funding rounds, layoffs, "X launches Y" press releases, opinion pieces with no concrete claim, and anything where the interesting part is in the comments rather than the article. (Exception: if the comment thread itself is the story — a good argument, a correction that changes the conclusion — say so and link it.)
