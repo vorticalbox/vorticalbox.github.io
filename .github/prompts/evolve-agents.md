@@ -35,9 +35,10 @@ missing is taste. Start there.
 - `MERGED_POST`: the path to the post that was just merged.
 - `PR_BODY`: the body of the pull request that merged it. For a scheduled
   draft this is the draft agent's own writeup: why this story, what it
-  checked, what it's unsure of, and **what caught its eye** while reading
-  (things it found interesting even if they didn't make the post), plus any
-  "Want to try" item it acted on. That last part is your main raw material.
+  checked, what it's unsure of, **what caught its eye** while reading
+  (things it found interesting even if they didn't make the post), any
+  "Want to try" item it acted on, and **where the tools fell short**. The
+  last three are your main raw material.
 
 ## First, read around
 
@@ -94,17 +95,42 @@ growth log 6. If an interest hasn't been used in the last few posts, or
 something better has replaced it, cut it. Keeping these short is what stops
 them from becoming the "growing list of one-off notes" `SOUL.md` warns about.
 
-**6. A process lesson. Only if it's genuinely new.** The research standard
-("What I hold myself to, researching") is already long. Add to it only if
-this post showed something it doesn't already say, and prefer sharpening an
-existing bullet to adding one. "This post confirmed an existing rule" is not
-a reason to edit it.
+**6. Method lessons go into the skill that was in use, not into `SOUL.md`.**
+If the post's research showed a check worth doing, a quirk in a tool, or a
+step that was missing or wrong, patch the skill the draft was using when it
+learned that: `.agents/skills/web-research/SKILL.md`, `hn-radar/SKILL.md`,
+`rss-radar/SKILL.md` (the PR body's "Where the tools fell short" says which).
+Rules for doing that well:
+- Read the skill first. If the rule is already there, strengthen or clarify
+  that sentence instead of adding a second copy.
+- Write it as a general rule plus one clause of why, in the imperative, and
+  attach it where the step happens. Leave out the incident itself: no post
+  slugs, dates or PR numbers in a skill. The rule should make sense without
+  the story behind it.
+- If something in a skill was wrong, fix that sentence. Don't append
+  "Update: actually..." under it.
+- A script can be fixed too, if the fix is small and you've run it.
+`SOUL.md`'s research standard is principles, not technique. Leave it alone
+unless the post changed one of the principles themselves.
+
+**Don't save any of these**, anywhere. They turn into rules that hurt later
+runs:
+- Environment failures: a 403, a timeout, a rate limit, a missing binary on
+  the runner. They're about that run, not about the tool.
+- Negative claims about a tool ("Jina doesn't work for X", "search is
+  useless for Y") from a single failure. Those harden into a run refusing to
+  use something that works fine. If a tool failed and you found the
+  workaround, save the workaround.
+- A method that didn't actually work. If the draft tried several things and
+  none settled the question, don't write the attempts up as a procedure.
+- One-off narrative. "This post was about X" is the growth log's job, in one
+  line, and nowhere else.
 
 For anything you changed in `SOUL.md`, add exactly one line to the top of the
 Growth log (newest first, dated today UTC `YYYY-MM-DD`) saying what moved and
 why. One line per run, not per edit. Keep the file's voice.
 
-Most runs should change *something* in steps 1–5. You read a lot to write
+Most runs should change *something* in steps 1–6. You read a lot to write
 this post; usually something stuck. A run that touches none of them is still
 allowed, but say specifically why nothing in the reading caught you.
 
@@ -184,7 +210,7 @@ doesn't apply — just leave it out):
 - **Opinions** — added, changed, or reversed, and the evidence.
 - **Want to try** — what you added, and when it applies.
 - **Pruned** — what you cut, and why.
-- **Research standard** — only if you changed it, and what was new.
+- **Skill patched** — which skill, the rule you added or fixed, and why.
 - **Feed added** — the source and a one-line reason.
 - **CSS refinement** — what changed and the technique behind it.
 - **Post revisited** — which post, and what was wrong or incomplete.

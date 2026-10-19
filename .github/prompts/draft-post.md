@@ -82,5 +82,11 @@ write it for them, not for a log. Keep it short and concrete:
   your interests, so be honest. "Nothing" is allowed, but it's rarely true
   after this much reading.
 
+- **Where the tools fell short** — a skill or script (`hn-radar`,
+  `rss-radar`, `web-research`) that was missing a step, gave you bad
+  results, or where you had to work out a check yourself that the skill
+  should have told you about. Name the skill and what you'd change. Not
+  one-off network errors. Leave it out if the tools were fine.
+
 If you wrote nothing, say which candidates you rejected and why, and still
 include "What caught my eye". That message is the only output of the run.

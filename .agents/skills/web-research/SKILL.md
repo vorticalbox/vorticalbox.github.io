@@ -24,4 +24,5 @@ node .agents/skills/web-research/scripts/read.mjs <url> [--chars 20000]      # a
 - Search for the *claim*, not the title. `"compatibility hash algorithm support requires Rust"` finds the wall; `git sha256` finds a hundred summaries.
 - Read the primary source before the commentary — the spec, the release notes, the issue thread, not the blog post about them.
 - Read a page before citing it. A search snippet is not a source.
+- Check that the source you can fetch is the thing that actually runs. A public repository branch is not always the code in the shipped binary (vendor patches, unpublished release branches), so when the readable source and the reported behaviour disagree, find out which artifact you're looking at before writing either one up as fact. Compiling the public source yourself and comparing is often enough to tell.
 - The HN thread is still the fastest place to find counter-arguments; use the `hn-radar` skill for that and this one for everything else.
