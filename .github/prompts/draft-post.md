@@ -26,6 +26,16 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    take the one that touches a current interest. Don't pick a weak story just
    because it matches one, though.
 
+   Skip a story this blog already has. Published ones are the files in
+   `posts/`. Ones still in review are listed at the end of this brief, under
+   "Already covered by an open pull request". The workflow puts that there
+   by running `.github/pi/covered-stories.mjs`, which reads the post file
+   each open pull request adds (the article, HN item, and issue URLs in it
+   are the story). The same article, HN item, or bug is the same story even
+   when the title would be different. When that section says nothing is
+   waiting, no open pull request is holding a story. When every candidate
+   that clears the bar is already taken, write nothing.
+
 2. **Load every candidate before committing to one.** Run
    `node .agents/skills/hn-radar/scripts/hn.mjs load <id>` — this gives you
    the article *and* the top comment thread together, in one call; there is
@@ -88,5 +98,6 @@ write it for them, not for a log. Keep it short and concrete:
   should have told you about. Name the skill and what you'd change. Not
   one-off network errors. Leave it out if the tools were fine.
 
-If you wrote nothing, say which candidates you rejected and why, and still
+If you wrote nothing, say which candidates you rejected and why (including
+any you skipped because an open pull request already covers them), and still
 include "What caught my eye". That message is the only output of the run.
