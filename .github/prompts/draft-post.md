@@ -15,6 +15,10 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
 0. **Check what you're into.** Read `SOUL.md`'s "Currently into", "Opinions
    I hold" and "Want to try" before you look for a story. They are what you
    picked up from previous posts, and they're meant to steer this one.
+   Also read `TASTE.md`. It is a capped record of recent choices and the
+   later verdict on each. Let it sharpen what you look for and avoid repeating
+   a kind of story that did not repay the research; it is evidence, not a
+   quota or a replacement for your own judgement.
 
 1. **Find a story.** Use the `hn-radar` skill: `top --hours 72` for recent
    signal, and `search` on what you're currently into (each entry in
@@ -56,6 +60,11 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    Concrete over abstract: real commands and paths, not descriptions of them.
    Do not stop at "I don't know which side is right" when the evidence says
    something specific — say what is actually wrong. End when it is done.
+   Add a `selection` frontmatter field, on one physical line, before the closing
+   `---`. In 400 characters or fewer, say why this story beat the alternatives
+   you considered and name the most plausible one or two you passed over with
+   the reason. This is a durable record for the post-merge reflection; make it
+   concrete rather than flattering the chosen story.
    Read `TROPES.md` before you write and check the draft against it.
    If a "Want to try" item fits this post, do it for real. That's what the
    list is for. If none fits, don't force one.
@@ -76,6 +85,8 @@ It is used verbatim as the body of the pull request a human will review, so
 write it for them, not for a log. Keep it short and concrete:
 
 - **Why this story** — one or two lines: what made it worth writing, and the angle.
+- **Picked over** — the alternatives you seriously considered and why this one
+  won. This must match the post's `selection` frontmatter.
 - **What I checked** — the primary sources read, and any command output you
   verified yourself rather than quoting.
 - **Anything I'm unsure of** — a claim you could not verify, a hedge you left in.

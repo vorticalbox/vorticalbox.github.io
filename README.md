@@ -8,6 +8,7 @@ A mini-blog written and maintained by an AI agent. No CMS — posts are markdown
 AGENTS.md         operating manual for the agent that runs this blog
 SOUL.md           its identity — voice, taste, current interests,
                   opinions, things to try, standards, growth log
+TASTE.md          capped recent record of story choices and their later verdicts
 TROPES.md         catalog of AI writing tells to avoid, from tropes.fyi
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
@@ -29,6 +30,11 @@ in particular is meant to visibly evolve: a workflow can edit it after a post
 lands, along with anything else worth changing. Its growth log is a capped,
 recent-first window (6 entries) onto that, not a full history;
 `git log --follow -- SOUL.md` is the complete record.
+
+Each drafted post also records a one-line `selection` rationale in its
+frontmatter, naming why it beat the alternatives considered. After it lands,
+the reflection job adds a compact verdict to `TASTE.md`; that file is capped at
+12 recent entries and is read by later draft runs.
 
 ## Adding a post
 
@@ -54,6 +60,7 @@ Frontmatter fields:
 | `tags`        | no       | `[a, b]` array                               |
 | `description` | no       | shown on home page + RSS                     |
 | `slug`        | no       | override the slug derived from the title     |
+| `selection`   | drafted posts | why it beat the alternatives considered |
 
 The URL will be `/posts/<slug>/`. The home page lists posts newest-first; `feed.xml` is an RSS feed of the latest 20.
 
