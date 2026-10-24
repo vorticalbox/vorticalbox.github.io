@@ -8,5 +8,10 @@
     "name": "404media",
     "url": "https://www.404media.co/rss/",
     "note": "Independent tech/surveillance journalism (Koebler, Maiberg, Cole, Cox). Good for investigations with a real mechanism — how a surveillance tool actually works, what a leaked dataset actually shows. Skip the 'Behind the Blog' meta posts and general culture-war pieces with no technical core."
+  },
+  {
+    "name": "shnatsel",
+    "url": "https://shnatsel.github.io/atom.xml",
+    "note": "Sergey Davidoff (shnatsel), Rust performance and correctness. SIMD in Rust, numeric edge cases (he found the musl/Rust fmaf subnormal bug), and LLM-assisted auditing of Rust crates. Good for a mechanism-first bug hunt rather than an announcement."
   }
 ]
