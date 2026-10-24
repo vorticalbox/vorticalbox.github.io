@@ -9,8 +9,10 @@ on:
     - cron: '0 9 */3 * *'
   workflow_dispatch:
 
-# Only the default token, scoped to what this job needs: push a branch and open
-# a pull request. It cannot touch master.
+# Only the default token, scoped to what this job needs. It cannot touch master.
+# contents: write — push the draft branch, and read a post file off a PR head.
+# pull-requests: write — list open PRs and open the draft. Write includes the
+# read that listing needs; there is no separate read grant.
 permissions:
   contents: write
   pull-requests: write
@@ -43,6 +45,14 @@ jobs:
           mkdir -p ~/.pi/agent
           cp .github/pi/models.json ~/.pi/agent/models.json
 
+      # Open PRs are not in the master checkout. Branch names and PR titles
+      # are the run date, so the story is the post file the PR adds.
+      # Zero open PRs is a normal result: the brief says nothing is waiting.
+      - name: List stories already covered by open pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/pi/covered-stories.mjs > "$RUNNER_TEMP/covered-stories.md"
+
       - name: Find, research and write a post
         env:
           HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
@@ -60,12 +70,15 @@ jobs:
           # without it a crashed agent looks exactly like a quiet run, because
           # both leave no changes for the PR step to find.
           set -o pipefail
-          pi --mode json \
+          {
+            cat .github/prompts/draft-post.md
+            echo
+            cat "$RUNNER_TEMP/covered-stories.md"
+          } | pi --mode json \
              --model "$PI_MODEL" \
              --provider hyper \
              --no-session \
              --approve \
-             < .github/prompts/draft-post.md \
             | node .github/pi/live-log.mjs "$RUNNER_TEMP/agent-summary.txt"
 
       - name: Open a pull request if a post was written
@@ -78,6 +91,36 @@ jobs:
             echo "--- agent summary ---"
             cat "$RUNNER_TEMP/agent-summary.txt"
             exit 0
+          fi
+
+          # Same check the prompt was given, run again on the draft itself.
+          # Exit 2: it repeats a story an open PR already has — a quiet run.
+          # Exit 1: open PRs could not be listed or read, so fail rather than
+          # open a PR we could not de-duplicate.
+          new_posts=()
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            path="${line:3}"
+            case "$path" in
+              *' -> '*) path="${path##* -> }" ;;
+            esac
+            case "$path" in
+              *.md) new_posts+=("$path") ;;
+            esac
+          done < <(git status --porcelain -- posts/ || true)
+
+          if [ "${#new_posts[@]}" -gt 0 ]; then
+            overlap_status=0
+            node .github/pi/covered-stories.mjs check "${new_posts[@]}" || overlap_status=$?
+            if [ "$overlap_status" -eq 2 ]; then
+              echo "Draft repeats a story already in an open pull request — not opening another."
+              echo "--- agent summary ---"
+              cat "$RUNNER_TEMP/agent-summary.txt"
+              exit 0
+            fi
+            if [ "$overlap_status" -ne 0 ]; then
+              exit "$overlap_status"
+            fi
           fi
 
           git config user.name "quill"
