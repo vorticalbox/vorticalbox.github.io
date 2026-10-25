@@ -16,19 +16,84 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    I hold" and "Want to try" before you look for a story. They are what you
    picked up from previous posts, and they're meant to steer this one.
    Also read `TASTE.md`. It is a capped record of recent choices and the
-   later verdict on each. Let it sharpen what you look for and avoid repeating
-   a kind of story that did not repay the research; it is evidence, not a
-   quota or a replacement for your own judgement.
+   later verdict on each, including — on entries that have the clause —
+   whether the pick was interesting or easy to verify. Let it sharpen what
+   you look for and avoid repeating a kind of story that did not repay the
+   research; it is evidence, not a quota or a replacement for your own
+   judgement. Do the subject-streak test in step 1 before you search, so a
+   subject that has to sit out is not what you go looking for.
 
-1. **Find a story.** Use the `hn-radar` skill: `top --hours 72` for recent
-   signal, and `search` on what you're currently into (each entry in
-   "Currently into") as well as the things this blog is generally about
-   (static sites, agents, git, Node, plain text, small tools). Points measure
-   attention, not quality. Also check the `rss-radar` skill:
-   `node .agents/skills/rss-radar/scripts/rss.mjs list` shows the configured
-   feeds, `fetch <name>` reads one. When two candidates are about as good,
-   take the one that touches a current interest. Don't pick a weak story just
-   because it matches one, though.
+1. **Find a story.** First decide whether a subject sits this pick out.
+   Then sweep. Points measure attention, not quality.
+
+   **Same subject.** The subject is the system the post is about: a library,
+   a format, a protocol, a chip, a compiler. The method is separate, and a
+   shared method does not start a streak. "I checked the spec against the
+   source and the binary", "I could reproduce it with a command", and the
+   "Currently into" line about the gap between spec, source, and binary are
+   methods. Do not sit a method out. Do not call two posts the same subject
+   because they share only a method.
+
+   How to name it:
+
+   - Order `posts/*.md` by the `date:` frontmatter, newest first. Skip
+     `hello-world.md`; it is the intro and has no story subject. If this
+     brief's "Already covered by an open pull request" section includes a
+     draft, count that draft as the newest post. The appendix gives its
+     path, title, and URLs, not its tags. The title and the URLs are enough
+     to tell a C library draft from a Git draft.
+   - Name each post's subject in a few words from its `tags`, `title`,
+     `description`, and `selection` when it has one. Tags are evidence.
+     Fold aliases into one subject: `glibc`, `musl`, `libc`, and `bionic`
+     are C library behaviour, whichever function the post tests. A
+     `floating-point` tag stays inside that subject when the post is about
+     a C library math function. It is a different subject when the post is
+     about a chip, a compiler, or a database and the C library is not the
+     thing that misbehaved.
+   - `SOUL.md` "Currently into" and `TASTE.md` are grouping hints, not a
+     second list of subjects. If an interest names slugs, those posts are
+     one group; use the concrete system it says they were about ("a C
+     library", "its man page"), not the method sentence. A `TASTE.md` line
+     is the same kind of hint. An interest that is really a method does not
+     get a streak of its own.
+   - Walk newest to oldest. Count the run of posts with the same subject.
+     Stop at the first post with a different subject.
+   - A standard library that is not a C library is a different subject,
+     except when it is the same bug copied across: musl `fmaf` and the Rust
+     `libm` port of it are one subject. The floating-point interest is not
+     the C-library subject by itself. A chip, a compiler, or a database
+     stays eligible. A C library math function does not, while that subject
+     is sitting out.
+
+   Recompute this from the files every run. Worked check of the alias rule,
+   not a standing ban: on the posts in the tree when the rule was written,
+   `math-error-man-page-stale`, `musl-fmaf-fixed-on-master-no-release`, and
+   `android-wcscspn-non-latin` are one subject (C library behaviour) and
+   `codex-daemon-by-default` ends the streak, even though
+   `strtod-errno-not-portable` is that subject again. A newer post with a
+   different subject ends it for real.
+
+   If that run is 2 or longer, the subject sits out this pick. Do not lead
+   the search with it. When any other candidate clears the usual bar (a
+   mechanism, a primary source, not a press release, not already covered),
+   do not pick the sitting-out subject. A current interest that *is* that
+   subject does not get the tie-break. When two candidates that are not
+   sitting out are about as good, take the one that touches a current
+   interest. Don't pick a weak story just because it matches one. If every
+   candidate that clears the bar is on the sitting-out subject, pick the
+   best of those — search it at that point, as the fallback. Sitting out
+   is not a reason to write nothing. One later post on a different subject
+   ends the streak, so the subject is eligible again on the pick after
+   that. A quiet run does not end it.
+
+   **Then sweep.** `hn-radar`: `top --hours 72` for recent signal, and
+   `search` on each "Currently into" entry whose subject is not sitting
+   out, plus the things this blog is generally about (static sites, agents,
+   git, Node, plain text, small tools). `rss-radar`: `list`, then `fetch`
+   every configured feed with `--limit 4`. Fetch feeds whose note is outside
+   the sitting-out subject first. Fetch a feed whose note is that subject
+   last, and only use it if nothing else has cleared the bar. A feed that
+   fails to load is a skip. Do not treat that as an empty sweep.
 
    Skip a story this blog already has. Published ones are the files in
    `posts/`. Ones still in review are listed at the end of this brief, under
@@ -63,8 +128,9 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    Add a `selection` frontmatter field, on one physical line, before the closing
    `---`. In 400 characters or fewer, say why this story beat the alternatives
    you considered and name the most plausible one or two you passed over with
-   the reason. This is a durable record for the post-merge reflection; make it
-   concrete rather than flattering the chosen story.
+   the reason. If a subject sat this pick out and that is why a candidate
+   lost, name the subject. This is a durable record for the post-merge
+   reflection; make it concrete rather than flattering the chosen story.
    Read `TROPES.md` before you write and check the draft against it.
    If a "Want to try" item fits this post, do it for real. That's what the
    list is for. If none fits, don't force one.

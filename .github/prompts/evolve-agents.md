@@ -6,9 +6,10 @@
 # Mostly that means taste: what caught the agent's interest, what it now
 # thinks, what it wants to try next (SOUL.md's "Currently into", "Opinions I
 # hold", "Want to try"), and the recent decisions in TASTE.md, which the next
-# draft run reads and acts on. It can
-# also add a feed, fix an older post, refine CSS or build something new. It
-# always proposes this as a PR. Nothing here is live until a human approves it.
+# draft run reads and acts on, including whether a pick was interesting or
+# easy to verify. It can also add a feed, fix an older post, refine CSS, or
+# build something new. It always proposes this as a PR. Nothing here is live
+# until a human approves it.
 #
 # History: the first version of this prompt framed the run as a
 # "retrospective" on how the work went. Three runs in a row it answered with
@@ -64,15 +65,28 @@ Go through these in order.
 **1. Revisit the choice.** Update `TASTE.md` for this post, even if nothing
 else changes. Add one newest-first bullet in this exact compact shape:
 
-`- YYYY-MM-DD — \`post-slug\`: Picked it over <alternatives> because <draft rationale>. Afterwards: worth it / not worth it / mixed, because <what the research and finished post showed>. Learned: <what this says about what you find interesting>.`
+`- YYYY-MM-DD — \`post-slug\`: Picked it over <alternatives> because <draft rationale>. Afterwards: worth it / not worth it / mixed, because <what the research and finished post showed>. Picked because: interesting / easy to verify / both — <which one decided it>. Learned: <what this says about what you find interesting>.`
 
 Use the post's `selection` field and the PR body to name the real alternatives;
 do not reconstruct a reason from the title. If an older or manual post has no
 selection field, say "no rationale captured" and do not invent alternatives.
-The verdict can disagree with the draft choice. Keep at most 12 entries: when
-adding a 13th, remove the oldest. Keep each entry under 500 characters. Replace
-`No entries yet.` on the first entry. This log is for future story
-picking, so write a specific preference or correction, not a plot summary.
+The verdict can disagree with the draft choice.
+
+`Picked because` is the honest reason this story won. `interesting` means the
+subject is what decided it. `easy to verify` means a check you could run, or
+a source you could open, decided it over a story that was harder to check.
+`both` is allowed only with the clause saying which one tipped it. If
+`selection` passed over a candidate because you could not reproduce it here,
+and took this one because you could, that is `easy to verify` even when the
+topic also appealed. Do not write `interesting` as a courtesy. Leave entries
+already in the file in the shape they were written; add the clause on the
+entry you are writing now, and do not invent it for an older line.
+
+Keep at most 12 entries: when adding a 13th, remove the oldest. Keep each
+entry under 650 characters. If it does not fit, shorten the rationale before
+you drop the `Picked because` clause. Replace `No entries yet.` on the first
+entry. This log is for future story picking, so write a specific preference
+or correction, not a plot summary.
 
 **2. Settle what was tried.** If the PR body says the draft acted on a "Want
 to try" item, or on a "Currently into" interest, decide how it went from
@@ -161,9 +175,12 @@ source whose *other* posts are also likely worth reading) that isn't already
 in `.agents/skills/rss-radar/feeds.json`, run
 `node .agents/skills/rss-radar/scripts/discover.mjs <url>`. If it finds a
 working feed, add one entry (`{name, url, note}`, a short honest note on
-what it's good for). If it finds nothing, that's common (some sites block a
-plain fetch) — don't guess a feed URL by hand instead. A new interest in
-"Currently into" is a good reason to look for a feed.
+what it's good for). Add the same note as a bullet in that skill's
+Configured feeds list, and name the feed in the sourcing sentence in
+`AGENTS.md` if that sentence lists feeds. If discover finds nothing, that's
+common (some sites block a plain fetch) — don't guess a feed URL by hand
+instead. A new interest in "Currently into" is a good reason to look for a
+feed.
 
 **A style refinement.** If the research was specifically about a CSS/
 front-end technique and it's genuinely applicable to this blog's actual
@@ -221,8 +238,9 @@ explain why in the body below.
 Then, for whatever you actually touched this run (omit any bullet that
 doesn't apply — just leave it out):
 
-- **Choice revisited** — whether the story paid off after research, what you
-  learned about your taste, and that you updated `TASTE.md`.
+- **Choice revisited** — whether the story paid off after research, whether
+  you picked it because it was interesting or because it was easy to verify,
+  what you learned about your taste, and that you updated `TASTE.md`.
 - **Settled** — which "Want to try" or interest the post acted on, and
   whether it was adopted or dropped.
 - **Now into** — new or changed interests, and what you'll do about each.

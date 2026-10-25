@@ -18,5 +18,55 @@
     "name": "sebsite",
     "url": "https://sebsite.pw/feed.xml",
     "note": "C as it actually runs vs. as the standard and libc document it — glibc/musl divergences, errno and math_errhandling, stale man pages. Good for the spec/source/binary gap with a reproduction."
+  },
+  {
+    "name": "shirriff",
+    "url": "https://www.righto.com/feeds/posts/default",
+    "note": "Ken Shirriff (righto.com). Die photos and microcode: what a chip actually computes, often past what the datasheet diagram shows. Good for a mechanism you can follow gate by gate, including the 8087's floating-point hardware. Skip a teardown that never gets to the algorithm."
+  },
+  {
+    "name": "haxx",
+    "url": "https://daniel.haxx.se/blog/feed/",
+    "note": "Daniel Stenberg, curl and HTTP. The recent items are often project news. Skip license, team, AI-policy, and release-announcement posts. Read one where a protocol edge or a bug has a trace of what curl or the server actually did."
+  },
+  {
+    "name": "filippo",
+    "url": "https://words.filippo.io/rss/",
+    "note": "Filippo Valsorda. Cryptography and TLS: a construction or a verification you can read line by line (how the NIST curve seeds were generated, a small ML-DSA verifier). Skip a policy roundup with no mechanism."
+  },
+  {
+    "name": "potaroo",
+    "url": "https://www.potaroo.net/rss.xml",
+    "note": "Geoff Huston. DNS and routing measurements, especially the root KSK roll and what validating resolvers actually did. Skip the economics, policy, and cable columns that have no protocol mechanism."
+  },
+  {
+    "name": "tzannounce",
+    "url": "https://lists.iana.org/hyperkitty/list/tz-announce@iana.org/feed/",
+    "note": "IANA tz-announce. Paul Eggert's release notes for the time zone database, a few a year. The story is the data change: a region drops DST, and the note explains the temporary model because CLDR or POSIX cannot represent it yet. Skip a release that is only a typo or a commentary fix."
+  },
+  {
+    "name": "databasearchitects",
+    "url": "https://databasearchitects.blogspot.com/feeds/posts/default",
+    "note": "Database Architects (TUM: Viktor Leis, Thomas Neumann, and co). Query execution, locking, and how an engine compares and plans values. Skip a post whose whole point is a language-feature microbenchmark with no query or storage mechanism."
+  },
+  {
+    "name": "ttaylorr",
+    "url": "https://github.blog/author/ttaylorr/feed/",
+    "note": "Taylor Blau's GitHub posts, mostly Highlights from Git x.y. Read for a behavior change in the release (on-disk format, fetch, pack), then the commit or the doc. Skip GitHub product posts and vulnerability announcements that are only a CVE list."
+  },
+  {
+    "name": "bernsteinbear",
+    "url": "https://bernsteinbear.com/feed.xml",
+    "note": "Max Bernstein. Language implementation: object representation, JITs, compilers emitting code at runtime. The January 2024 item is an RSS-only apology with no URL; skip it. Skip a post that is only a course announcement."
+  },
+  {
+    "name": "corsix",
+    "url": "https://www.corsix.org/rss.xml",
+    "note": "Peter Cawley (corsix). Instruction encoding, numeric approximations, and what a compiler or a CPU actually accepted. Good for a spec-versus-bits post outside the C library. Skip a note with no encoding, approximation, or compiler mechanism."
+  },
+  {
+    "name": "bitsgalore",
+    "url": "https://www.bitsgalore.org/atom.xml",
+    "note": "Johan van der Knijff. Legacy file formats, a few posts a year: what the bytes mean, and which readers still disagree with the spec (Quattro, Multiplan, TIFF). Skip a post that only gets an old program running in an emulator and never opens the format."
   }
 ]

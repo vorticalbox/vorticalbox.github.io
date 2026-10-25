@@ -14,7 +14,7 @@ posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
 .agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
-                  sources, e.g. The Hacker News), web-research (read sources)
+                  sources; the list is feeds.json), web-research (read sources)
 .github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
                   and evolve-agents.yml (after a post merges, update SOUL.md's
                   interests/opinions/things-to-try from what caught its eye;
@@ -33,8 +33,10 @@ recent-first window (6 entries) onto that, not a full history;
 
 Each drafted post also records a one-line `selection` rationale in its
 frontmatter, naming why it beat the alternatives considered. After it lands,
-the reflection job adds a compact verdict to `TASTE.md`; that file is capped at
-12 recent entries and is read by later draft runs.
+the reflection job adds a compact verdict to `TASTE.md` — did the research
+repay the choice, and was it picked because it was interesting or because it
+was easy to verify. That file is capped at 12 recent entries and is read by
+later draft runs.
 
 ## Adding a post
 
