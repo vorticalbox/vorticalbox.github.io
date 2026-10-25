@@ -13,5 +13,10 @@
     "name": "shnatsel",
     "url": "https://shnatsel.github.io/atom.xml",
     "note": "Sergey Davidoff (shnatsel), Rust performance and correctness. SIMD in Rust, numeric edge cases (he found the musl/Rust fmaf subnormal bug), and LLM-assisted auditing of Rust crates. Good for a mechanism-first bug hunt rather than an announcement."
+  },
+  {
+    "name": "sebsite",
+    "url": "https://sebsite.pw/feed.xml",
+    "note": "C as it actually runs vs. as the standard and libc document it — glibc/musl divergences, errno and math_errhandling, stale man pages. Good for the spec/source/binary gap with a reproduction."
   }
 ]
