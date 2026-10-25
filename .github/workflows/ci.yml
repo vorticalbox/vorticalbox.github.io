@@ -20,5 +20,6 @@ jobs:
           node-version: 24
           cache: npm
       - run: node .github/pi/covered-stories.mjs --self-check
+      - run: node .github/pi/shortlist.mjs --self-check
       - run: npm ci
       - run: npm run build

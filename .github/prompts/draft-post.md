@@ -20,11 +20,24 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    whether the pick was interesting or easy to verify. Let it sharpen what
    you look for and avoid repeating a kind of story that did not repay the
    research; it is evidence, not a quota or a replacement for your own
-   judgement. Do the subject-streak test in step 1 before you search, so a
-   subject that has to sit out is not what you go looking for.
+   judgement. The **Shortlist** appended after this brief is the mixture to
+   read first. Step 1 says how it was built.
 
-1. **Find a story.** First decide whether a subject sits this pick out.
-   Then sweep. Points measure attention, not quality.
+1. **Find a story.** Start with that shortlist. It already mixes Hacker News
+   and every feed in `feeds.json`, round-robin, the same number of slots
+   each. Each item is labelled with its source and a subject. Position is
+   not rank. Points on an HN line measure attention, not quality. You may
+   look past the list — `hn-radar search`, or `rss-radar fetch` for one
+   feed — when a current interest needs a story the list does not have.
+   Do not start over from Hacker News and sample the feeds afterwards.
+
+   The list has already dropped a URL published in `posts/` or cited by an
+   open pull request. The "Already covered" section is that same exclusion,
+   spelled out. A subject that is sitting out is not in the mixture. It is
+   under **Sitting out**, and you use it only when nothing in the shortlist
+   clears the bar. The script's "Sitting out" line is the test below. If
+   the newest post in `posts/`, or an open draft (which counts as newer),
+   is a different subject than that line, trust the posts.
 
    **Same subject.** The subject is the system the post is about: a library,
    a format, a protocol, a chip, a compiler. The method is separate, and a
@@ -73,27 +86,18 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    `strtod-errno-not-portable` is that subject again. A newer post with a
    different subject ends it for real.
 
-   If that run is 2 or longer, the subject sits out this pick. Do not lead
-   the search with it. When any other candidate clears the usual bar (a
-   mechanism, a primary source, not a press release, not already covered),
-   do not pick the sitting-out subject. A current interest that *is* that
-   subject does not get the tie-break. When two candidates that are not
-   sitting out are about as good, take the one that touches a current
-   interest. Don't pick a weak story just because it matches one. If every
-   candidate that clears the bar is on the sitting-out subject, pick the
-   best of those — search it at that point, as the fallback. Sitting out
-   is not a reason to write nothing. One later post on a different subject
-   ends the streak, so the subject is eligible again on the pick after
-   that. A quiet run does not end it.
-
-   **Then sweep.** `hn-radar`: `top --hours 72` for recent signal, and
-   `search` on each "Currently into" entry whose subject is not sitting
-   out, plus the things this blog is generally about (static sites, agents,
-   git, Node, plain text, small tools). `rss-radar`: `list`, then `fetch`
-   every configured feed with `--limit 4`. Fetch feeds whose note is outside
-   the sitting-out subject first. Fetch a feed whose note is that subject
-   last, and only use it if nothing else has cleared the bar. A feed that
-   fails to load is a skip. Do not treat that as an empty sweep.
+   If that run is 2 or longer, the subject sits out this pick. The shortlist
+   already held those items out of the mixture. When any other candidate
+   clears the usual bar (a mechanism, a primary source, not a press release,
+   not already covered), do not pick the sitting-out subject. A current
+   interest that *is* that subject does not get the tie-break. When two
+   candidates that are not sitting out are about as good, take the one that
+   touches a current interest. Don't pick a weak story just because it
+   matches one. If every candidate that clears the bar is on the
+   sitting-out subject, pick the best of those. Sitting out is not a reason
+   to write nothing. One later post on a different subject ends the streak,
+   so the subject is eligible again on the pick after that. A quiet run
+   does not end it.
 
    Skip a story this blog already has. Published ones are the files in
    `posts/`. Ones still in review are listed at the end of this brief, under

@@ -53,6 +53,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node .github/pi/covered-stories.mjs > "$RUNNER_TEMP/covered-stories.md"
 
+      # HN and every feed, round-robin, with a sitting-out subject held back.
+      # A dead feed or a dead HN exits 0 and names itself in the brief; the
+      # step fails only if the script itself crashes.
+      - name: Mix Hacker News and every feed into one shortlist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/pi/shortlist.mjs > "$RUNNER_TEMP/shortlist.md"
+
       - name: Find, research and write a post
         env:
           HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
@@ -72,6 +80,8 @@ jobs:
           set -o pipefail
           {
             cat .github/prompts/draft-post.md
+            echo
+            cat "$RUNNER_TEMP/shortlist.md"
             echo
             cat "$RUNNER_TEMP/covered-stories.md"
           } | pi --mode json \

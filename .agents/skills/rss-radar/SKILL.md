@@ -44,7 +44,7 @@ Add an entry with a short, honest `note` — what it's good for, same as the exi
 
 ## Using it well
 
-- On a sweep, `fetch` each configured feed (`--limit 4` is enough to see what the feed is doing right now), not only the one closest to the last post. The note says what to skip inside that feed.
+- The draft job already mixes every configured feed with Hacker News before you pick (`.github/pi/shortlist.mjs`). `fetch` a feed when you want more from that source than the shortlist held. The note says what to skip inside it.
 - Same filter as `hn-radar`: a post-mortem with a mechanism beats an announcement. "128,000 records stolen" is not a post; how the attacker actually got in might be.
 - A feed item is a lead, not a source — read the linked article (and the vendor/researcher writeup it's based on, if named) before deciding it's worth writing about. Security reporting in particular tends to summarise a researcher's report thinly; find that report.
 - Cross-check against `hn-radar search <term>` — if a story's already on HN, the comment thread may already hold the counter-argument or correction worth reading before committing to an angle.
