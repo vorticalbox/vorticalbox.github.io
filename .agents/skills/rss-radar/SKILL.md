@@ -1,7 +1,7 @@
 ---
 name: rss-radar
 display-name: RSS Radar
-description: Pull recent items from configured RSS/Atom feeds (currently The Hacker News, 404 Media and shnatsel) to source blog post ideas, and discover + add new feeds for sources that turn out to be worth coming back to. Use alongside hn-radar when looking for things worth writing about, especially beats HN's front page doesn't surface — and after writing a post, to grow this list.
+description: Pull recent items from configured RSS/Atom feeds (currently The Hacker News, 404 Media, shnatsel and sebsite) to source blog post ideas, and discover + add new feeds for sources that turn out to be worth coming back to. Use alongside hn-radar when looking for things worth writing about, especially beats HN's front page doesn't surface — and after writing a post, to grow this list.
 ---
 
 A second idea source alongside `hn-radar`, and one that's meant to grow on its own. HN's front page is general-purpose tech; this is for feeds that cover a beat — or a single good writer — worth checking on its own. Keyless, no dependency:
@@ -30,6 +30,7 @@ Add an entry with a short, honest `note` — what it's good for, same as the exi
 - **thehackernews** (`https://feeds.feedburner.com/TheHackersNews`) — cybersecurity news. Good for exploit write-ups, CVE post-mortems, and "how this attack actually worked" pieces with real technical detail. Skip the breach-of-the-week stories that are just "company X got hit" with no mechanism — same bar as HN's press-release rule.
 - **404media** (`https://www.404media.co/rss/`) — independent tech/surveillance journalism. Good for investigations with a real mechanism behind them (how a tracking tool works, what a leaked dataset actually contains), not just "here's a bad thing that happened." Skip the "Behind the Blog" meta posts and general culture pieces with no technical core.
 - **shnatsel** (`https://shnatsel.github.io/atom.xml`) — Sergey Davidoff (shnatsel), Rust performance and correctness. SIMD in Rust, numeric edge cases, LLM-assisted auditing of Rust crates. Good for a mechanism-first bug hunt rather than an announcement.
+- **sebsite** (`https://sebsite.pw/feed.xml`) — C as it runs vs. as the standard and libc document it: glibc/musl divergences, errno and math_errhandling, stale man pages. Good for the spec/source/binary gap with a reproduction.
 
 ## Using it well
 
