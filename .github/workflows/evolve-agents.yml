@@ -74,10 +74,10 @@ jobs:
         if: steps.post.outputs.skip != 'true'
         run: npm i -g --ignore-scripts @earendil-works/pi-coding-agent
 
-      # Same approach as draft-post.yml: Hyper isn't a provider Pi knows
-      # about, so it's declared via a template whose apiKey is the
-      # $HYPER_API_KEY env var, not the key itself.
-      - name: Register the Hyper provider
+      # Same approach as draft-post.yml: cloud is not Pi's local Ollama
+      # provider, so it's declared via a template whose apiKey is the
+      # $OLLAMA_CLOUD env var, not the key itself.
+      - name: Register the Ollama Cloud provider
         if: steps.post.outputs.skip != 'true'
         run: |
           mkdir -p ~/.pi/agent
@@ -86,9 +86,9 @@ jobs:
       - name: Reflect on the post and decide what, if anything, to change
         if: steps.post.outputs.skip != 'true'
         env:
-          HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
+          OLLAMA_CLOUD: ${{ secrets.OLLAMA_CLOUD }}
           JINA_API_KEY: ${{ secrets.JINA_TOKEN }}
-          PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
+          PI_MODEL: ${{ vars.PI_MODEL || 'nemotron-3-ultra' }}
           MERGED_POST: ${{ steps.post.outputs.path }}
           PR_BODY: ${{ steps.post.outputs.pr_body }}
           # A deny-list, not an allow-list: this job can touch almost the
@@ -129,7 +129,7 @@ jobs:
             echo '```'
           } | pi --mode json \
                  --model "$PI_MODEL" \
-                 --provider hyper \
+                 --provider ollama-cloud \
                  --no-session \
                  --approve \
                 | node .github/pi/live-log.mjs "$RUNNER_TEMP/agent-summary.txt"
