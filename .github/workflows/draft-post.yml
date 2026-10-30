@@ -37,10 +37,11 @@ jobs:
       - name: Install Pi
         run: npm i -g --ignore-scripts @earendil-works/pi-coding-agent
 
-      # Pi has no built-in "hyper" provider, so it has to be declared. This is
-      # the agent-dir location (~/.pi/agent/models.json); the committed file is
-      # a template whose apiKey is the $HYPER_API_KEY env var, not the key.
-      - name: Register the Hyper provider
+      # Pi's built-in Ollama provider is the local server. Cloud is a separate
+      # OpenAI-compatible endpoint, declared here. This is the agent-dir
+      # location (~/.pi/agent/models.json); the committed file is a template
+      # whose apiKey is the $OLLAMA_CLOUD env var, not the key.
+      - name: Register the Ollama Cloud provider
         run: |
           mkdir -p ~/.pi/agent
           cp .github/pi/models.json ~/.pi/agent/models.json
@@ -55,10 +56,10 @@ jobs:
 
       - name: Find, research and write a post
         env:
-          HYPER_API_KEY: ${{ secrets.HYPER_API_KEY }}
+          OLLAMA_CLOUD: ${{ secrets.OLLAMA_CLOUD }}
           # The repository secret is JINA_TOKEN; the scripts read JINA_API_KEY.
           JINA_API_KEY: ${{ secrets.JINA_TOKEN }}
-          PI_MODEL: ${{ vars.PI_MODEL || 'deepseek-v4.1-flash' }}
+          PI_MODEL: ${{ vars.PI_MODEL || 'nemotron-3-ultra' }}
           # Enforced by .pi/extensions/path-guard.ts, not just the prompt: this
           # job may only write/edit under posts/. --approve trusts .pi/ for
           # this run so the project-local extension actually loads.
@@ -76,7 +77,7 @@ jobs:
             cat "$RUNNER_TEMP/covered-stories.md"
           } | pi --mode json \
              --model "$PI_MODEL" \
-             --provider hyper \
+             --provider ollama-cloud \
              --no-session \
              --approve \
             | node .github/pi/live-log.mjs "$RUNNER_TEMP/agent-summary.txt"

@@ -1,13 +1,22 @@
 {
   "providers": {
-    "hyper": {
-      "baseUrl": "https://hyper.charm.land/v1",
+    "ollama-cloud": {
+      "baseUrl": "https://ollama.com/v1",
       "api": "openai-completions",
-      "apiKey": "$HYPER_API_KEY",
+      "apiKey": "$OLLAMA_CLOUD",
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "maxTokensField": "max_tokens",
+        "supportsUsageInStreaming": true
+      },
       "models": [
-        { "id": "glm-5.3-flash", "name": "GLM 5.3 Flash", "contextWindow": 1048576, "maxTokens": 131072 },
-        { "id": "qwen3.8-flash", "name": "Qwen3.8 Flash", "contextWindow": 1000000, "maxTokens": 128000 },
-        { "id": "deepseek-v4.1-flash", "name": "DeepSeek V4.1 Flash", "contextWindow": 1048576, "maxTokens": 262144 }
+        {
+          "id": "nemotron-3-ultra",
+          "name": "Nemotron 3 Ultra",
+          "contextWindow": 1048576,
+          "maxTokens": 32768
+        }
       ]
     }
   }
