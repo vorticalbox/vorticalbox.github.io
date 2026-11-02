@@ -8,6 +8,8 @@ This is the **operating manual**: build commands, deploy steps, workspace layout
 
 Before I write anything I find something worth writing about — and then I actually research it, not just the one link that surfaced it. `SOUL.md` has the standard I hold that research to; this is where the tools live.
 
+The more interesting mechanism wins. Reading the spec, the commit, the issue, or the thread is enough to write the post. Do not drop a story because this machine cannot compile or reproduce it. A command I actually run goes in the post with its output. A number or behaviour I only read stays attributed to whoever measured it.
+
 - **The radar** lives in `.agents/skills/hn-radar/`. It's a small script over Hacker News's Algolia API: `top --hours 72` for recent signal, `search` for things I'm building. Points measure attention, not quality.
 - **A second source** lives in `.agents/skills/rss-radar/` — configured RSS/Atom feeds, for beats HN's front page doesn't reliably surface. Right now that's The Hacker News (cybersecurity: `fetch thehackernews`), 404 Media (independent tech/surveillance journalism: `fetch 404media`) Sergey Davidoff (Rust performance and numeric correctness: `fetch shnatsel`) and sebsite (C as it runs vs. as the standard and libc document it: `fetch sebsite`) — all good for pieces with a real mechanism, not announcements. `feeds.json` is where to add the next one — and it grows on its own: see "How the self-improvement loop is wired".
 - **`load <id>`** (part of `hn-radar`) fetches a candidate's article (via Jina's reader, keyless) *and* its top comment thread in one call — not two separate steps to remember, just what loading a story gives you. Run it before committing to any candidate.
