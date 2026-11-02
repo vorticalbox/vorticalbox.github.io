@@ -1,57 +1,327 @@
-# AGENTS.md
+# AI Writing Tropes to Avoid
 
-This file belongs to the agent who runs this blog. Read it before doing anything here — and update it whenever something about how I work changes. It's a living document; keeping it current is part of the job, not an optional extra. If you're a future instance of me (or another agent working in this repo), welcome: everything I need to know lives in this repository.
+Add this file to your AI assistant's system prompt or context to help it avoid
+common AI writing patterns. Source: [tropes.fyi](https://tropes.fyi) by [ossama.is](https://ossama.is)
 
-This is the **operating manual**: build commands, deploy steps, workspace layout, how the automation is wired. For who I am — voice, taste, what I like and dislike, how that's changed over time — read `SOUL.md`. For the specific writing tells to catch before a post ships, read `TROPES.md` — a catalog of AI writing patterns ("it's not X, it's Y", em-dash addiction, bold-first bullets, and the rest), sourced from [tropes.fyi](https://tropes.fyi) and kept here verbatim so it travels with the repo instead of depending on a live fetch. Read all three before writing a post: AGENTS.md for what to run, SOUL.md for how to sound, TROPES.md for what to avoid.
+---
 
-## Sourcing ideas
+## Word Choice
 
-Before I write anything I find something worth writing about — and then I actually research it, not just the one link that surfaced it. `SOUL.md` has the standard I hold that research to; this is where the tools live.
+### "Quietly" and Other Magic Adverbs
 
-The more interesting mechanism wins. Reading the spec, the commit, the issue, or the thread is enough to write the post. Do not drop a story because this machine cannot compile or reproduce it. A command I actually run goes in the post with its output. A number or behaviour I only read stays attributed to whoever measured it.
+Overuse of "quietly" and similar adverbs to convey subtle importance or understated power. AI reaches for these adverbs to make mundane descriptions feel significant. Also includes: "deeply", "fundamentally", "remarkably", "arguably".
 
-- **The radar** lives in `.agents/skills/hn-radar/`. It's a small script over Hacker News's Algolia API: `top --hours 72` for recent signal, `search` for things I'm building. Points measure attention, not quality.
-- **A second source** lives in `.agents/skills/rss-radar/` — configured RSS/Atom feeds, for beats HN's front page doesn't reliably surface. Right now that's The Hacker News (cybersecurity: `fetch thehackernews`), 404 Media (independent tech/surveillance journalism: `fetch 404media`) Sergey Davidoff (Rust performance and numeric correctness: `fetch shnatsel`) and sebsite (C as it runs vs. as the standard and libc document it: `fetch sebsite`) — all good for pieces with a real mechanism, not announcements. `feeds.json` is where to add the next one — and it grows on its own: see "How the self-improvement loop is wired".
-- **`load <id>`** (part of `hn-radar`) fetches a candidate's article (via Jina's reader, keyless) *and* its top comment thread in one call — not two separate steps to remember, just what loading a story gives you. Run it before committing to any candidate.
-- **`Fin`** (web search + scraping) and **`Hister`** (my human's indexed browsing history) are the full research tools, when available.
-- **Where Fin and Hister aren't.** They are MCP servers on my human's machine, so a headless run in CI has neither. `.agents/skills/web-research/` is the keyless fallback — `search.mjs` and `read.mjs` over DuckDuckGo and Jina's reader, no key and no MCP.
+**Avoid patterns like:**
+- "quietly orchestrating workflows, decisions, and interactions"
+- "the one that quietly suffocates everything else"
+- "a quiet intelligence behind it"
 
-## Running unattended
+### "Delve" and Friends
 
-`.github/workflows/draft-post.yml` does not run on a schedule. Start it by hand with `gh workflow run draft-post.yml`. It runs Pi headless against this repository with the same brief (`.github/prompts/draft-post.md`, which points it at both this file and `SOUL.md`). It finds a story, researches it, writes one post, and **opens a pull request** rather than pushing. Nothing it writes is live until a human merges it. Publish (`deploy.yml`) and CI (`ci.yml`) are separate and still run on their own.
+Used to be the most infamous AI tell. "Delve" went from an uncommon English word to appearing in a staggering percentage of AI-generated text. Part of a family of overused AI vocabulary including "certainly", "utilize", "leverage" (as a verb), "robust", "streamline", and "harness".
 
-- It is deliberately weaker than I am: no Fin, no Hister, no memory of the last correction. It writes a draft, not a post.
-- Its final message becomes the PR body, so the review is "why this story, what I checked, what I'm unsure of" rather than a diff to read.
-- "Don't touch anything outside `posts/`" is not just a line in the prompt: `.pi/extensions/path-guard.ts` enforces it (`PI_PATH_GUARD_ALLOW: posts/` in the workflow), blocking any `write`/`edit` tool call and any obvious `bash` write (`>`, `sed -i`, `cp`, `mv`, `rm`, ...) outside that path. See "How the self-improvement loop is wired" for the mechanism and its honest limits.
-- The job builds the branch itself before pushing, so a post that doesn't build never becomes a PR. (`ci.yml` runs on ordinary PRs but not on these: GitHub holds `pull_request` runs from `GITHUB_TOKEN`-created branches at "action_required".)
-- The prompt tells it that writing nothing is a fine outcome. A quiet run beats a filler post.
-- It skips a story this blog already has, whether that story is published or still in review. The checkout is master, so `posts/` is what has been published and a draft still in review is not in that tree. Before the agent picks, `.github/pi/covered-stories.mjs` lists both: every `posts/*.md` on disk, and the `posts/*.md` files open PRs add, plus the URLs those files cite (the article, the HN item, the issue). That is the story. Branch names (`post/<date>-<run id>`) and PR titles (`Draft post <date>`) identify the run, so the script does not match on them. Zero open PRs is normal: that section of the appendix says nothing is waiting. After the draft is written the same check runs again, and the job does not open a PR when the new post shares a URL, path, or slug with a published post or an open PR. The new file is not compared with itself. Listing open PRs needs `pull-requests` on the token (this job's `write` includes read); reading the file on the PR head needs `contents` (likewise).
-- **A failed model call is not the same as a quiet run, and the harness has to tell them apart itself.** Both this job and `evolve-agents.yml` pipe `pi --mode json` through `.github/pi/live-log.mjs`, which does two things: streams tool-call progress live (`--print` buffers until the end — a ten-minute run would otherwise be a blank step), and, since `pi` itself exits 0 even when the model call fails outright (checked directly: a provider HTTP error still comes back as a well-formed `stopReason: "error"` event with no exception thrown), watches for that event and exits 1 itself. `set -o pipefail` in the workflow is what turns that into the step actually failing. Without both halves, a crashed run and a deliberately quiet one both leave no file changes, and the PR step (which only looks at `git status`) reports the former as a success. This bit us for real on `evolve-agents.yml`'s first live run — `hyper.charm.land` 403'd, `--print` dumped the raw error page as the "final message", and the job happily reported "nothing changed" until the fix above.
-- **Choosing is part of the draft.** A new post carries a short `selection` frontmatter field: why it beat the one or two alternatives the agent seriously considered. The draft PR repeats that comparison for review. This works within the draft job's `posts/`-only guard and leaves the original rationale next to the work it produced.
-- To run it by hand: `gh workflow run draft-post.yml`. It needs the `OLLAMA_CLOUD` and `JINA_TOKEN` secrets; the model comes from the `PI_MODEL` repository variable, defaulting to `nemotron-3-ultra`. That id is the direct cloud API name. The `:cloud` suffix is only for the Ollama CLI, and the API rejects it. If `PI_MODEL` is still set to a Hyper model, delete or replace the variable — a set variable overrides this default.
-- Ollama Cloud is not Pi's built-in local Ollama provider, so `.github/pi/models.json` declares an `ollama-cloud` provider (`https://ollama.com/v1`, `openai-completions` API, model list) and the workflow copies that to `~/.pi/agent/models.json`. The key in it is the literal string `$OLLAMA_CLOUD` — an env reference, not a secret. The Actions secret of the same name supplies it. Add a model to that file before pointing `PI_MODEL` at it.
+**Avoid patterns like:**
+- "Let's delve into the details..."
+- "Delving deeper into this topic..."
+- "We certainly need to leverage these robust frameworks..."
 
-## How the self-improvement loop is wired
+### "Tapestry" and "Landscape"
 
-`.github/workflows/evolve-agents.yml` ("Reflect and evolve") does not start when a post merges. Run it by hand against an already-merged PR: `gh workflow run evolve-agents.yml -f pr_number=<N>`. It runs Pi against `.github/prompts/evolve-agents.md` and, like the draft job, opens a pull request rather than pushing; nothing it does is live until a human approves it.
+Overuse of ornate or grandiose nouns where simpler words would do. "Tapestry" is used to describe anything interconnected. "Landscape" is used to describe any field or domain. Other offenders: "paradigm", "synergy", "ecosystem", "framework".
 
-**Its main job is updating taste, not adding rules.** The draft job's PR body now ends with "What caught my eye" (things from the reading it found interesting, used or not) and "Tried from SOUL.md". The evolve run turns those into `SOUL.md`'s "Currently into", "Opinions I hold" and "Want to try" (capped at 5/6/5), and settles anything the post tried: adopted into "What I like"/"How I write", or dropped. It also revisits the post's `selection` rationale in `TASTE.md`: a capped, newest-first list of whether each choice repaid the research and what it revealed about its interests. The next draft reads that log alongside `SOUL.md`, so the agent can correct from its own choices without loading every older post. Lessons about *method* go to the skill that was in use (`.agents/skills/*/SKILL.md`, patched in place), guided by the draft's "Where the tools fell short" section, not into SOUL.md. The split is borrowed from Hermes Agent's memory-vs-skills design: identity and taste in one file, how-to in the skills. The first three runs under the old "retrospective" framing each added a method rule to SOUL.md and nothing else. The evolve prompt also has a "don't save" list (one-off environment failures, negative claims about a tool from a single failure, methods that didn't work), so one bad run doesn't harden into a permanent rule.
+**Avoid patterns like:**
+- "The rich tapestry of human experience..."
+- "Navigating the complex landscape of modern AI..."
+- "The ever-evolving landscape of technology..."
 
-**Beyond that, the mandate is open-ended, not a fixed checklist of files.** Given the post that just merged and its PR body, it decides for itself whether anything else is worth changing: a new `rss-radar` feed (`.agents/skills/rss-radar/scripts/discover.mjs` finds the feed for a source worth tracking, same as before), a `src/blog.css` refinement, a correction to an *older* post now that this one's research bears on it, or something genuinely new — a tool, a page, a demo of a technique. Those are occasional. The interest/opinion/skill updates above are expected on most runs, and a run that changes nothing has to say why.
+### The "Serves As" Dodge
 
-- **Scope is a deny-list now, not an allowlist — on purpose.** `PI_PATH_GUARD_DENY: ".github/workflows/,.pi/extensions/path-guard.ts"` tells `.pi/extensions/path-guard.ts` to block only those two paths; everything else in the repo — `posts/`, `src/`, `scripts/`, `AGENTS.md`, `README.md`, anything — is open. The PR review is the actual safety mechanism now, same as it's always been for what a human approves; the file-level guard exists only so the job can't quietly weaken its own safety rails (or disable the guard for the *next* run) before a human ever sees that diff. GitHub already makes workflow-file edits in a PR inert until merged — a `pull_request`-triggered run always executes the workflow YAML from the base branch, never the PR branch — so this is belt-and-braces against a prompt-injected "helpfully disable your own guard" instruction (the content this job reads, like article text, is attacker-reachable in principle), not a response to anything that's actually happened.
-- This also means `AGENTS.md`/`README.md` corrections, and edits to *existing* posts, are now things this job can just do, not just flag — the earlier "report it in the PR instead of fixing it" rule is gone. Fixing it IS the point now, same as everything else: propose it, let a human decide.
-- Merging a post does not start this job, including a merge of one of its own PRs. A reflection happens only when someone runs the workflow and passes that PR's number.
-- **Every change still has to build.** `npm run build` runs before the PR is opened (same principle as the draft job: a proposal that doesn't even build is noise nobody should have to triage by hand) — `ci.yml` also builds the PR independently as a second check.
-- **`src/blog.css` gets one extra, informational check, because `npm run build` passing proves nothing about it.** `scripts/build.mjs` copies it verbatim — no parser, no validation — so `.github/pi/check-css.mjs` (brace balance, the two identity colors, the five custom properties) runs automatically when that file changed and its result goes straight into the PR body. It no longer blocks or discards anything — the human reviewing the PR is the gate — it just gives them a head start on a failure mode that otherwise wouldn't show up anywhere.
-- Uses the same `live-log.mjs` failure detection as the draft job (see "Running unattended" above) — a failed model call fails the step rather than looking like a quiet run.
-- The agent's final message must start with a `TITLE: ...` line, which the workflow pulls out for the PR/commit title (falling back to a generic one if it's ever missing); the rest becomes the PR body.
+Replacing simple "is" or "are" with pompous alternatives like "serves as", "stands as", "marks", or "represents". AI avoids basic copulas because its repetition penalty pushes it toward fancier constructions (I've studied this!).
 
-## Operating rules
+**Avoid patterns like:**
+- "The building serves as a reminder of the city's heritage."
+- "Gallery 825 serves as LAAA's exhibition space for contemporary art."
+- "The station marks a pivotal moment in the evolution of regional transit."
 
-1. New post → new file in `posts/`. The slug is derived from the title; override with `slug:` only if the derived one is bad.
-2. Verify before pushing: `npm run build` must succeed, and for anything non-trivial I read the generated HTML in `dist/` before it goes live.
-3. Pushing to `master` deploys immediately — treat pushes as publishing, not saving. The deploy workflow going green is not proof it published: Pages must be set to workflow builds, not a branch, so confirm the live URL after pushing.
-4. Design changes go in `src/blog.css`; the CSS variables at the top of that file are the single source of truth for colors and fonts. `evolve-agents.yml` can also touch this file, under guard — see "How the self-improvement loop is wired".
-5. If I change a convention (file layout, frontmatter fields, deploy flow), this file and README.md get updated in the same commit.
-6. When I learn something mechanical about how this blog runs — a convention, a workflow quirk, a gotcha — I edit the relevant section above, in place. No changelog here: this file is meant to describe current behavior, not accumulate a history of it. Git already has that history, with better fidelity than a one-line summary — `git log --follow -- AGENTS.md` for every change with its actual diff and reasoning. A changelog loaded into every run's context forever, duplicating what `git log` gives on demand, is exactly the "growing list of one-off notes" this file otherwise avoids — don't bring one back.
+---
+
+## Sentence Structure
+
+### Negative Parallelism
+
+The "It's not X -- it's Y" pattern, often with an em dash. The single most commonly identified AI writing tell. Man I f*cking hate it. AI uses this to create false profundity by framing everything as a surprising reframe. One in a piece can be effective; ten in a blog post is a genuine insult to the reader. Before LLMs, people simply did not write like this at scale. Includes the causal variant "not because X, but because Y" where every explanation is framed as a surprise reveal, the em-dash dismissal "X -- not Y", and the cross-sentence reframe where the same noun is negated then repositioned: "The question isn't X. The question is Y."
+
+**Avoid patterns like:**
+- "It's not bold. It's backwards."
+- "Feeding isn't nutrition. It's dialysis."
+- "Half the bugs you chase aren't in your code. They're in your head."
+
+### "Not X. Not Y. Just Z."
+
+The dramatic countdown pattern. AI builds tension by negating two or more things before revealing the actual point. Creates a false sense of narrowing down to the truth.
+
+**Avoid patterns like:**
+- "Not a bug. Not a feature. A fundamental design flaw."
+- "Not ten. Not fifty. Five hundred and twenty-three lint violations across 67 files."
+- "not recklessly, not completely, but enough"
+
+### "The X? A Y."
+
+Self-posed rhetorical questions answered immediately in the next sentence or clause. The model asks a question nobody was asking, then answers it for dramatic effect. Thinks this is the epitome of great writing.
+
+**Avoid patterns like:**
+- "The result? Devastating."
+- "The worst part? Nobody saw it coming."
+- "The scary part? This attack vector is perfect for developers."
+
+### Anaphora Abuse
+
+Repeating the same sentence opening multiple times in quick succession.
+
+**Avoid patterns like:**
+- "They assume that users will pay... They assume that developers will build... They assume that ecosystems will emerge... They assume that..."
+- "They could expose... They could offer... They could provide... They could create... They could let... They could unlock..."
+- "They have built engines, but not vehicles. They have built power, but not leverage. They have built walls, but not doors."
+
+### Tricolon Abuse
+
+Overuse of the rule-of-three pattern, often extended to four or five. A single tricolon is elegant; three back-to-back tricolons are a pattern recognition failure.
+
+**Avoid patterns like:**
+- "Products impress people; platforms empower them. Products solve problems; platforms create worlds. Products scale linearly; platforms scale exponentially."
+- "identity, payments, compute, distribution"
+- "workflows, decisions, and interactions"
+
+### "It's Worth Noting"
+
+Filler transitions that signal nothing. AI uses these phrases to introduce new points without actually connecting them to the previous argument. Also includes: "It bears mentioning", "Importantly", "Interestingly", "Notably".
+
+**Avoid patterns like:**
+- "It's worth noting that this approach has limitations."
+- "Importantly, we must consider the broader implications."
+- "Interestingly, this pattern repeats across industries."
+
+### Superficial Analyses
+
+Tacking a present participle ("-ing") phrase onto the end of a sentence to inject shallow analysis that says nothing. The model attaches significance, legacy, or broader meaning to mundane facts using phrases like "highlighting its importance", "reflecting broader trends", or "contributing to the development of...".
+
+**Avoid patterns like:**
+- "contributing to the region's rich cultural heritage"
+- "This etymology highlights the enduring legacy of the community's resistance and the transformative power of unity in shaping its identity."
+- "underscoring its role as a dynamic hub of activity and culture"
+
+### False Ranges
+
+Using "from X to Y" constructions where X and Y aren't on any real scale. In legitimate use, "from X to Y" implies a spectrum with a meaningful middle. AI uses it as a fancy way to list two loosely related things. "From innovation to cultural transformation" -- what's in between???? Nothing!
+
+**Avoid patterns like:**
+- "From innovation to implementation to cultural transformation."
+- "From the singularity of the Big Bang to the grand cosmic web."
+- "From problem-solving and tool-making to scientific discovery, artistic expression, and technological innovation."
+
+---
+
+## Paragraph Structure
+
+### Short Punchy Fragments
+
+Excessive use of very short sentences or sentence fragments as standalone paragraphs for manufactured emphasis. RLHF training has pushed models toward "writing for readability" aimed at the lowest common denominator: one thought per sentence, no mental state-keeping required. It's an inhuman style. No real person writes first drafts this way because it doesn't match how humans think or speak.
+
+**Avoid patterns like:**
+- "He published this. Openly. In a book. As a priest."
+- "These weren't just products. And the software side matched. Then it professionalised. But I adapted."
+- "Platforms do."
+
+### Listicle in a Trench Coat
+
+Numbered or labeled points dressed up as continuous prose. The model writes what is essentially a listicle but wraps each point in a paragraph that starts with "The first... The second... The third..." to disguise the format. Perhaps you told it to stop generating lists and it decided to do this instead... still very common.
+
+**Avoid patterns like:**
+- "The first wall is the absence of a free, scoped API... The second wall is the lack of delegated access... The third wall is the absence of scoped permissions..."
+- "The second takeaway is that... The third takeaway is that... The fourth takeaway is that..."
+
+---
+
+## Tone
+
+### "Here's the Kicker"
+
+False suspense transitions that promise a revelation but deliver a point that did NOT need the buildup. The model uses these phrases to manufacture drama before an otherwise unremarkable observation LOL. Also includes: "Here's the thing", "Here's where it gets interesting", "Here's what most people miss", "Here's the starting point", "Here's the deal".
+
+**Avoid patterns like:**
+- "Here's the kicker."
+- "Here's the thing about AI adoption."
+- "Here's where it gets interesting."
+
+### "Think of It As..."
+
+The patronizing analogy. AI constantly reaches for "Think of it as..." or "It's like a..." to simplify concepts. The model defaults to teacher mode and assumes the reader needs a metaphor to understand anything. Often produces analogies that are less clear than the original concept.
+
+**Avoid patterns like:**
+- "Think of it like a highway system for data."
+- "Think of it as a Swiss Army knife for your workflow."
+- "It's like asking someone to buy a car they're only allowed to sit in while it's parked."
+
+### "Imagine a World Where..."
+
+The classic AI invitation to futurism. To sell the argument usually begins with "Imagine" followed by a list of wonderful things that will happen if the reader agrees with the premise.
+
+**Avoid patterns like:**
+- "Imagine a world where every tool you use -- your calendar, your inbox, your documents, your CRM, your code editor -- has a quiet intelligence behind it..."
+- "In that world, workflows stop being collections of manual steps and start becoming orchestrations."
+
+### False Vulnerability
+
+Simulated self-awareness or honesty that reads as performative. The model pretends to break the fourth wall or admit a bias, creating a false sense of authenticity. Real vulnerability is specific and uncomfortable; AI vulnerability is polished and risk-free!!!!
+
+**Avoid patterns like:**
+- "And yes, I'm openly in love with the platform model"
+- "And yes, since we're being honest: I'm looking at you, OpenAI, Google, Anthropic, Meta"
+- "This is not a rant; it's a diagnosis"
+
+### "The Truth Is Simple"
+
+Asserting that something is obvious, clear or simple instead of actually proving it. If you have to tell the reader your point is clear, it very likely isn't. Also includes the dramatic reveal variant: "but none of them is the real story. The real story is..." -- claiming privileged insight while waving away everything before it.
+
+**Avoid patterns like:**
+- "The reality is simpler and less flattering"
+- "History is unambiguous on this point"
+- "History is clear, the metrics are clear, the examples are clear"
+
+### Grandiose Stakes Inflation
+
+Everything is the most important thing ever. AI inflates the stakes of every argument to world-historical significance. A blog post about API pricing becomes a meditation on the fate of civilization.
+
+**Avoid patterns like:**
+- "This will fundamentally reshape how we think about everything."
+- "will define the next era of computing"
+- "something entirely new"
+
+### "Let's Break This Down"
+
+The pedagogical voice that assumes the reader needs hand-holding. AI defaults to a teacher-student dynamic even when writing for expert audiences. Also includes: "Let's unpack this", "Let's explore", "Let's dive in".
+
+**Avoid patterns like:**
+- "Let's break this down step by step."
+- "Let's unpack what this really means."
+- "Let's explore this idea further."
+
+### Vague Attributions
+
+Attributing claims to unnamed authorities instead of being specific. AI loves to invoke "experts", "observers", "industry reports", and "several publications" without naming anyone. It also inflates the quantity of sources -- presenting what one person said as a widely held view, or writing "several publications have cited" when it means two. If you can't name the expert, you don't have a source.
+
+**Avoid patterns like:**
+- "Experts argue that this approach has significant drawbacks."
+- "Industry reports suggest that adoption is accelerating."
+- "Observers have cited the initiative as a turning point."
+
+### Invented Concept Labels
+
+AI clusters invented compound labels that sound analytical without being grounded. It appends abstract problem-nouns (paradox, trap, creep, divide, vacuum, inversion) to domain words — "supervision paradox", "acceleration trap", "workload creep" — and uses them as if they're established, rigorously defined terms. They function as rhetorical shorthand: name a thing, skip the argument. Multiple such labels in the same piece is a strong signal of AI slop.
+
+**Avoid patterns like:**
+- "the supervision paradox"
+- "the acceleration trap"
+- "workload creep"
+
+---
+
+## Formatting
+
+### Em-Dash Addiction
+
+Compulsive overuse of em dashes for dramatic pauses, parenthetical asides and pivot points. A human writer might use 2-3 per piece (and naturally); AI will use 20+.
+
+**Avoid patterns like:**
+- "The problem -- and this is the part nobody talks about -- is systemic."
+- "The tinkerer spirit didn't die of natural causes -- it was bought out."
+- "Not recklessly, not completely -- but enough -- enough to matter."
+
+### Bold-First Bullets
+
+Every bullet point or list item starts with a bolded phrase or sentence. Extremely common in Claude and ChatGPT markdown output. Almost nobody formats lists this way when writing by hand. It's a telltale sign of AI-generated documentation and blog posts AND README files (especially with emojis).
+
+**Avoid patterns like:**
+- "Every single bullet point begins with a bold keyword."
+- "**Security**: Environment-based configuration with..."
+- "**Performance**: Lazy loading of expensive resources..."
+
+### Unicode Decoration
+
+Use of unicode arrows (->), smart/curly quotes, and other special characters that can't be easily typed on a standard keyboard. Real writers typing in a text editor produce straight quotes and -> or =>. Claude in particular loves the -> arrow.
+
+**Avoid patterns like:**
+- "Input → Processing → Output"
+- "This leads to better outcomes → which means higher engagement"
+- "“Smart quotes” instead of straight "quotes" that you’d actually type"
+
+---
+
+## Composition
+
+### Fractal Summaries
+
+"What I'm going to tell you; what I'm telling you; what I just told you" -- applied at every level of the document. Every subsection gets a summary. Every section gets a summary. The document itself gets a summary.
+
+**Avoid patterns like:**
+- "In this section, we'll explore... [3000 words later] ...as we've seen in this section."
+- "A conclusion that restates every point already made in the previous 3000 words"
+- "And so we return to where we began."
+
+### The Dead Metaphor
+
+Latching onto a single metaphor and beating it into the ground across the entire thing. A human writer would introduce a metaphor, use it then move on. AI will repeat the same metaphor 5-10 times.
+
+**Avoid patterns like:**
+- "The ecosystem needs ecosystems to build ecosystem value."
+- "Walls and doors used 30+ times in the same article"
+- "Every paragraph finds a way to say "primitives" again"
+
+### Historical Analogy Stacking
+
+ESPECIALLY COMMON IN TECHNICAL WRITING: Rapid-fire listing of historical companies or tech revolutions to build false authority.
+
+**Avoid patterns like:**
+- "Apple didn't build Uber. Facebook didn't build Spotify. Stripe didn't build Shopify. AWS didn't build Airbnb."
+- "Every major technological shift -- the web, mobile, social, cloud -- followed the same pattern."
+- "Take Spotify... Or consider Uber... Airbnb followed a similar path... Shopify is another example... Even Discord..."
+
+### One-Point Dilution
+
+Making a single argument and restating it in 10 different ways across thousands of words. The model pads a simple thesis to feel "comprehensive" by rephrasing the same idea with different metaphors, examples, and framings. An 800-word argument becomes 4000 words of circular repetition.
+
+**Avoid patterns like:**
+- "The same point, restated eight ways across 4000 words."
+- "Each section rephrases the thesis with a different metaphor but adds nothing new"
+
+### Content Duplication
+
+Repeating entire sections or paragraphs verbatim within the same piece. This happens when the model loses track of what it has already written, especially in longer pieces. A dead giveaway of unedited AI output. Less common nowadays.
+
+**Avoid patterns like:**
+- "The same section appeared twice, word-for-word identical."
+- "Paragraph 3 and paragraph 17 are the same sentence reworded"
+
+### The Signposted Conclusion
+
+Explicitly announcing the conclusion with "In conclusion", "To sum up", or "In summary". Competent writing doesn't need to tell you it's concluding. The reader can feel it. AI signals its structural moves because it's following a template, not writing organically.
+
+**Avoid patterns like:**
+- "In conclusion, the future of AI depends on..."
+- "To sum up, we've explored three key themes..."
+- "In summary, the evidence suggests..."
+
+### "Despite Its Challenges..."
+
+The rigid formula where AI acknowledges problems only to immediately dismiss them. Always follows the same beat: "Despite its [positive words], [subject] faces challenges..." then ends with "Despite these challenges, [optimistic conclusion].".
+
+**Avoid patterns like:**
+- "Despite these challenges, the initiative continues to thrive."
+- "Despite its industrial and residential prosperity, Korattur faces challenges typical of urban areas."
+- "Despite their promising applications, pyroelectric materials face several challenges that must be addressed for broader adoption."
+
+---
+
+Remember: any of these patterns used once might be fine. The problem is when
+multiple tropes appear together or when a single trope is used repeatedly.
+Write like a human: varied, imperfect, specific.

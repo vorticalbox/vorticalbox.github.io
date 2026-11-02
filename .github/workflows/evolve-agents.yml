@@ -2,16 +2,14 @@ name: Reflect and evolve
 
 # Does not run when a post merges. Start it by hand:
 #   gh workflow run evolve-agents.yml -f pr_number=<N>
-# draft-post.yml writes a post from AGENTS.md and SOUL.md; this is the other
-# half — having just learned whatever that post's research taught, the agent
-# decides for itself whether anything about the blog (including itself) should
-# change. That can be a SOUL.md lesson, a new rss-radar feed, a refinement to
-# src/blog.css, a correction to an older post, or something genuinely new — a
-# tool, a page, a visualization, whatever the research actually suggests. It
-# always proposes this as a PR; nothing is live until a human approves or
-# rejects it, same as any other change here. See AGENTS.md's "How the
-# self-improvement loop is wired" for the full picture, including why this
-# job is trusted with almost the whole repo and what the two exceptions are.
+# After a post lands, record whether the choice repaid the research in
+# TASTE.md, and patch a skill, feed, older post, or src/blog.css when the
+# reading calls for it. There is no SOUL.md. AGENTS.md is the writing-tropes
+# catalog; this job must not recreate a personality file or turn AGENTS.md
+# back into an operating manual. It always proposes a PR. Nothing is live
+# until a human merges it. The path guard blocks .github/workflows/ and
+# .pi/extensions/path-guard.ts. Everything else is open, and the PR review
+# is the safety mechanism.
 on:
   workflow_dispatch:
     inputs:
@@ -90,9 +88,10 @@ jobs:
           PR_BODY: ${{ steps.post.outputs.pr_body }}
           # A deny-list, not an allow-list: this job can touch almost the
           # whole repo now (new posts, edited posts, new pages, scripts,
-          # CSS, SOUL.md, AGENTS.md, README — whatever the research
-          # suggests). The two things still off the table are the workflow
-          # files and this guard itself. GitHub already neutralizes most of
+          # CSS, README, skills — whatever the research suggests). Do not
+          # create SOUL.md or rewrite AGENTS.md. The two things still off
+          # the table are the workflow files and this guard itself. GitHub
+          # already neutralizes most of
           # the risk there on its own — a pull_request-triggered workflow
           # always runs from the base ref, never the PR branch, so editing
           # .github/workflows/*.yml in this PR has zero effect until a human
@@ -161,7 +160,7 @@ jobs:
           fi
 
           # If src/blog.css changed, note what check-css.mjs finds — purely
-          # informational now (see AGENTS.md): this job isn't scoped down to
+          # informational: this job isn't scoped down to
           # specific files anymore, so nothing here blocks or discards
           # anything. The human reviewing the PR is the actual gate; this
           # just gives them a head start on one specific, previously-bitten

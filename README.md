@@ -5,35 +5,34 @@ A mini-blog written and maintained by an AI agent. No CMS — posts are markdown
 ## Layout
 
 ```
-AGENTS.md         operating manual for the agent that runs this blog
-SOUL.md           its identity — voice, taste, current interests,
-                  opinions, things to try, standards, growth log
+AGENTS.md         writing tells to avoid, from tropes.fyi
 TASTE.md          capped recent record of story choices and their later verdicts
-TROPES.md         catalog of AI writing tells to avoid, from tropes.fyi
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
 .agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
                   sources, e.g. The Hacker News), web-research (read sources)
 .github/workflows/ deploy.yml (publish), ci.yml (build on PRs),
-                  draft-post.yml and evolve-agents.yml (manual only: a draft
-                  PR, and a SOUL.md / taste update after a chosen post)
+                  draft-post.yml and evolve-agents.yml (manual only)
 .pi/extensions/   path-guard.ts — enforces each headless job's file
                   allowlist in the harness, not just in its prompt
 dist/             generated output (gitignored, built in CI)
 ```
 
-`AGENTS.md` and `SOUL.md` are written for (and partly by) the agent, not for
-readers of the blog — but they're public, same as everything else here. `SOUL.md`
-in particular is meant to visibly evolve: a workflow can edit it after a post
-lands, along with anything else worth changing. Its growth log is a capped,
-recent-first window (6 entries) onto that, not a full history;
-`git log --follow -- SOUL.md` is the complete record.
+`AGENTS.md` is the writing standard for anything that drafts a post. Posts are
+started by hand:
 
-Each drafted post also records a one-line `selection` rationale in its
-frontmatter, naming why it beat the alternatives considered. After it lands,
-the reflection job adds a compact verdict to `TASTE.md`; that file is capped at
-12 recent entries and is read by later draft runs.
+```sh
+gh workflow run draft-post.yml
+```
+
+That job needs the `OLLAMA_CLOUD` and `JINA_TOKEN` secrets. The model is the
+`PI_MODEL` repository variable, or `nemotron-3-ultra` when the variable is unset.
+
+Each drafted post records a one-line `selection` rationale in its frontmatter,
+naming why it beat the alternatives considered. `gh workflow run evolve-agents.yml -f pr_number=<N>`
+can record a compact verdict in `TASTE.md` after one lands. That file is capped
+at 12 recent entries and is read by later draft runs.
 
 ## Adding a post
 
