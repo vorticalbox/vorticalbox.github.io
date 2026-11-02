@@ -1,37 +1,44 @@
 #!/usr/bin/env node
 /**
- * Stories an open pull request already covers, for the scheduled draft job.
+ * Stories this blog already covers, for the draft job.
  *
- * draft-post.yml checks out master, so the agent can see published posts and
- * cannot see a draft that is still an open PR. The branch name
- * (`post/<date>-<run id>`) and the PR title (`Draft post <date>`) identify
- * the run. The story is the `posts/*.md` file that PR adds, and the URLs
- * that file cites: the article, the HN item, the issue. Two drafts of one
- * piece had different slugs; the shared URL is what lines them up.
+ * Two places hold a story the next draft must not repeat. Published posts
+ * are the `posts/*.md` files on the checkout. A draft still in review is
+ * not in that tree: draft-post.yml checks out master, so open pull requests
+ * are read with `gh`. The branch name (`post/<date>-<run id>`) and the PR
+ * title (`Draft post <date>`) identify the run, not the story. The story is
+ * the `posts/*.md` file, and the URLs that file cites: the article, the HN
+ * item, the issue. Two drafts of one piece had different slugs; the shared
+ * URL is what lines them up. Reading `posts/` is part of the check because
+ * a model that was told to skip those files wrote the musl fmaf post again.
  *
  *   node covered-stories.mjs
- *       Brief for the draft prompt. Zero open PRs is a normal, successful
- *       result: the brief says nothing is waiting.
+ *       Brief for the draft prompt: open PRs, then published posts.
+ *       Zero open PRs is a normal, successful result.
  *   node covered-stories.mjs check <post.md>...
  *       Exit 2 when a file shares a story URL, path, or slug with an open
- *       PR. Exit 1 when open PRs could not be listed or read. Exit 0 when
- *       the files are clear.
+ *       PR or a published post. The file being checked is not compared with
+ *       itself, so a new draft sitting in `posts/` does not fail for existing.
+ *       Exit 1 when open PRs or `posts/` could not be read. Exit 0 when clear.
  *   node covered-stories.mjs --prs <file>
- *       Same commands, from a JSON file instead of `gh`:
+ *       Same commands, from a JSON file instead of `gh`, and without
+ *       scanning `posts/` on disk:
  *       [{ "number": 16, "title": "...", "posts": [{ "path": "posts/a.md", "body": "..." }] }]
  *       A PR with an empty `posts` array covers nothing. An empty array
  *       covers nothing.
  *   node covered-stories.mjs --pr <number>
- *       Dry run against that PR (repeatable) instead of the open list.
- *       Merged and closed PRs work here, so a past duplicate can be replayed.
+ *       Dry run against that PR (repeatable) instead of the open list, still
+ *       including published posts. Merged and closed PRs work here.
  *   node covered-stories.mjs --self-check
  *
  * Listing uses `gh pr list` / `gh pr view` (pull-requests permission).
- * Reading a post uses the contents API on the PR's head branch (contents
- * permission). draft-post.yml grants both as write, which includes read.
+ * Reading a post on a PR head uses the contents API (contents permission).
+ * draft-post.yml grants both as write, which includes read. Published posts
+ * are read from the working tree.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const URL_RE = /https?:\/\/[^\s<>\]"'`]+/gi;
 const SOCIAL_HOSTS = new Set(['twitter.com', 'x.com', 't.co', 'youtube.com', 'youtu.be']);
@@ -142,7 +149,11 @@ function identity(md, path) {
 
 function findOverlap(filePath, body, stories) {
   const local = identity(body, filePath);
+  const self = repoPath(filePath);
   for (const story of stories) {
+    // The draft is already an untracked file in posts/ when check runs.
+    // Matching it against that same file would reject every post.
+    if (story.pr == null && repoPath(story.path) === self) continue;
     const other = identity(story.body, story.path);
     const shared = [...local.keys].filter((k) => other.keys.has(k));
     if (shared.length) return { pr: story.pr, path: story.path, title: other.title, shared };
@@ -159,7 +170,8 @@ function describeKey(key) {
 function formatHit(file, hit) {
   const shown = hit.shared.slice(0, 3).map(describeKey);
   const extra = hit.shared.length > 3 ? ` (+${hit.shared.length - 3} more)` : '';
-  return `covered-stories: ${repoPath(file)} overlaps PR #${hit.pr} ${hit.path} via ${shown.join(', ')}${extra}`;
+  const where = hit.pr == null ? `published ${hit.path}` : `PR #${hit.pr} ${hit.path}`;
+  return `covered-stories: ${repoPath(file)} overlaps ${where} via ${shown.join(', ')}${extra}`;
 }
 
 function formatBrief(stories) {
@@ -167,7 +179,7 @@ function formatBrief(stories) {
     return [
       '## Already covered by an open pull request',
       '',
-      'Nothing is waiting in an open pull request. Published posts in `posts/` are the only stories already taken.',
+      'Nothing is waiting in an open pull request.',
       '',
     ].join('\n');
   }
@@ -190,6 +202,58 @@ function formatBrief(stories) {
   }
   lines.push('');
   return lines.join('\n');
+}
+
+function formatPublished(stories) {
+  if (!stories.length) {
+    return [
+      '## Already published',
+      '',
+      'No published posts in `posts/`.',
+      '',
+    ].join('\n');
+  }
+  const lines = [
+    '## Already published',
+    '',
+    'These stories are already in `posts/`. Skip them. The same article, HN item, or bug counts even when the title would be different.',
+    '',
+  ];
+  for (const story of stories) {
+    const { title } = frontmatter(story.body);
+    const heading = title ? `${story.path} — ${title}` : story.path;
+    lines.push(`- \`${heading}\``);
+    const urls = storyUrls(story.body);
+    const shown = urls.slice(0, 12);
+    for (const url of shown) lines.push(`  - ${url}`);
+    if (urls.length > shown.length) {
+      lines.push(`  - ${urls.length - shown.length} further URLs omitted from this list; the pre-PR check still matches on them`);
+    }
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
+function renderBrief(openStories, published) {
+  return formatBrief(openStories) + formatPublished(published);
+}
+
+/** Published posts on disk. `pr: null` marks them as not an open pull request. */
+function publishedStories(dir = 'posts') {
+  let names;
+  try {
+    names = readdirSync(dir);
+  } catch (err) {
+    if (err.code === 'ENOENT') return [];
+    throw err;
+  }
+  const stories = [];
+  for (const name of names.sort()) {
+    if (!name.endsWith('.md')) continue;
+    const path = repoPath(join(dir, name));
+    stories.push({ pr: null, path, body: readFileSync(join(dir, name), 'utf8') });
+  }
+  return stories;
 }
 
 function storiesFromData(data) {
@@ -421,6 +485,37 @@ function selfCheck() {
   eq(brief.includes('https://shnatsel.github.io/implementing-fma-finding-bugs-in-std'), true, 'brief names a story URL');
   eq(brief.includes('Draft post 2026-10-19'), false, 'brief does not use the run-date PR title as the story');
 
+  const published = [{ pr: null, path: 'posts/musl-fmaf-fixed-on-master-no-release.md', body: open[0].posts[0].body }];
+  const sequel = findOverlap('posts/musl-fmaf-again.md', dup, published);
+  eq(sequel?.pr, null, 'published overlap has no PR number');
+  eq(
+    formatHit('posts/musl-fmaf-again.md', sequel).includes('overlaps published posts/musl-fmaf-fixed-on-master-no-release.md'),
+    true,
+    'hit names the published file',
+  );
+  eq(
+    findOverlap('posts/musl-fmaf-fixed-on-master-no-release.md', open[0].posts[0].body, published),
+    null,
+    'a published file does not overlap itself',
+  );
+  const publishedBrief = formatPublished(published);
+  eq(publishedBrief.includes('## Already published'), true, 'published brief has its own section');
+  eq(publishedBrief.includes('PR #'), false, 'published brief does not invent a PR number');
+  eq(publishedStories('posts/does-not-exist').length, 0, 'missing posts dir covers nothing');
+
+  const onDisk = publishedStories();
+  const fmaf = onDisk.find((s) => s.path === 'posts/musl-fmaf-fixed-on-master-no-release.md');
+  if (!fmaf) {
+    failures.push('published posts/musl-fmaf-fixed-on-master-no-release.md is missing');
+  } else {
+    const again = findOverlap('posts/musl-fmaf-sequel.md', dup, onDisk);
+    eq(again?.pr, null, 'real published fmaf post overlaps a sequel');
+    eq(again?.path, fmaf.path, 'sequel names the published fmaf file');
+    eq(findOverlap(fmaf.path, fmaf.body, onDisk), null, 'checking the published fmaf file does not match itself');
+    const fresh = '---\ntitle: something new\nslug: something-new\n---\nNo links.\n';
+    eq(findOverlap('posts/something-new.md', fresh, onDisk), null, 'unrelated draft does not overlap published posts');
+  }
+
   const quoted = frontmatter('---\ntitle: "Hello"\nslug: \'hello\'\n---\n');
   eq(quoted, { title: 'Hello', slug: 'hello' }, 'quoted frontmatter');
 
@@ -438,14 +533,18 @@ function main() {
     return;
   }
 
-  let stories;
+  let openStories;
+  let published = [];
   try {
-    if (args.prs) stories = storiesFromMock(args.prs);
-    else if (args.prNumbers.length) stories = loadPrNumbers(args.prNumbers);
-    else stories = loadOpen();
+    if (args.prs) openStories = storiesFromMock(args.prs);
+    else if (args.prNumbers.length) openStories = loadPrNumbers(args.prNumbers);
+    else openStories = loadOpen();
+    // --prs is a hermetic stand-in for `gh`. A real run also reads posts/.
+    if (!args.prs) published = publishedStories();
   } catch (err) {
     die(err.message);
   }
+  const stories = [...openStories, ...published];
 
   if (args.mode === 'check') {
     const hits = [];
@@ -463,13 +562,20 @@ function main() {
       console.log(hits.join('\n'));
       process.exit(2);
     }
-    console.log(stories.length
-      ? `covered-stories: no overlap with ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} in open pull requests`
-      : 'covered-stories: no open pull request adds a post');
+    if (args.prs) {
+      console.log(openStories.length
+        ? `covered-stories: no overlap with ${openStories.length} stor${openStories.length === 1 ? 'y' : 'ies'} in open pull requests`
+        : 'covered-stories: no open pull request adds a post');
+    } else {
+      const open = openStories.length
+        ? `${openStories.length} stor${openStories.length === 1 ? 'y' : 'ies'} from pull requests`
+        : 'no pull-request story';
+      console.log(`covered-stories: no overlap with ${open} or ${published.length} published post${published.length === 1 ? '' : 's'}`);
+    }
     return;
   }
 
-  process.stdout.write(formatBrief(stories));
+  process.stdout.write(args.prs ? formatBrief(openStories) : renderBrief(openStories, published));
 }
 
 main();

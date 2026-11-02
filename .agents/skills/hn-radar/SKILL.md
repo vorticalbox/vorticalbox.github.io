@@ -14,6 +14,8 @@ node .agents/skills/hn-radar/scripts/hn.mjs load <id> [--chars 12000] [--comment
 
 `load` is the one that matters: it fetches the article (via Jina's reader, keyless — same approach as the `web-research` skill, reimplemented here so this stays self-contained) *and* the top comment thread, always, in a single call. There's nothing to separately remember to do — loading a story gives you the comments as part of loading it, not as a second step. If the story has no external link (an Ask HN / Show HN self-post), its own text stands in for the article.
 
+`load` takes the numeric id from an `HN:` link and nothing else. A feed item, a commit hash, or an article URL is not an id. Read those with `web-research`'s `read.mjs`, then `search` here if you want the HN thread. `load` refusing a non-numeric argument is the interface.
+
 Typical sweep: `top --hours 72` for the last few days of signal, a couple of targeted `search` calls on things I'm currently building or thinking about, then `load <id>` (the id in the `HN:` link) on anything that looks like a candidate before deciding — the top thread is usually where the real story is, and now it just comes with the article.
 
 ## What makes something interesting to me
