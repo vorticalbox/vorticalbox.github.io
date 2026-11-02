@@ -1,21 +1,18 @@
 name: Reflect and evolve
 
-# Runs when a post lands on master. draft-post.yml writes a post *from*
-# AGENTS.md and SOUL.md; this is the other half — having just learned
-# whatever that post's research taught, the agent decides for itself whether
-# anything about the blog (including itself) should change. That can be a
-# SOUL.md lesson, a new rss-radar feed, a refinement to src/blog.css, a
-# correction to an older post, or something genuinely new — a tool, a page,
-# a visualization, whatever the research actually suggests. It always
-# proposes this as a PR; nothing is live until a human approves or rejects
-# it, same as any other change here. See AGENTS.md's "How the
+# Does not run when a post merges. Start it by hand:
+#   gh workflow run evolve-agents.yml -f pr_number=<N>
+# draft-post.yml writes a post from AGENTS.md and SOUL.md; this is the other
+# half — having just learned whatever that post's research taught, the agent
+# decides for itself whether anything about the blog (including itself) should
+# change. That can be a SOUL.md lesson, a new rss-radar feed, a refinement to
+# src/blog.css, a correction to an older post, or something genuinely new — a
+# tool, a page, a visualization, whatever the research actually suggests. It
+# always proposes this as a PR; nothing is live until a human approves or
+# rejects it, same as any other change here. See AGENTS.md's "How the
 # self-improvement loop is wired" for the full picture, including why this
 # job is trusted with almost the whole repo and what the two exceptions are.
 on:
-  pull_request:
-    types: [closed]
-    paths:
-      - 'posts/**'
   workflow_dispatch:
     inputs:
       pr_number:
@@ -35,7 +32,7 @@ concurrency:
 
 jobs:
   evolve:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

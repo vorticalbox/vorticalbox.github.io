@@ -15,11 +15,10 @@ scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
 .agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
                   sources, e.g. The Hacker News), web-research (read sources)
-.github/workflows/ deploy.yml (publish), draft-post.yml (scheduled draft PR),
-                  and evolve-agents.yml (after a post merges, update SOUL.md's
-                  interests/opinions/things-to-try from what caught its eye;
-                  can also PR feeds, CSS, an older post, or new code)
-.pi/extensions/   path-guard.ts — enforces each scheduled job's file
+.github/workflows/ deploy.yml (publish), ci.yml (build on PRs),
+                  draft-post.yml and evolve-agents.yml (manual only: a draft
+                  PR, and a SOUL.md / taste update after a chosen post)
+.pi/extensions/   path-guard.ts — enforces each headless job's file
                   allowlist in the harness, not just in its prompt
 dist/             generated output (gitignored, built in CI)
 ```
