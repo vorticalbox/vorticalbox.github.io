@@ -1,12 +1,7 @@
 name: Draft a post
 
-# Runs roughly every three days. Note that a "*/3" day-of-month cron is not
-# actually every three days — day-of-month resets at each month boundary, so you
-# get 3, 6, ... 30, then the 1st. Daily with an early exit is the reliable way to
-# get a true interval; a few days' drift is not worth the complexity here.
+# Does not run on a schedule. Start it by hand with `gh workflow run draft-post.yml`.
 on:
-  schedule:
-    - cron: '0 9 */3 * *'
   workflow_dispatch:
 
 # Only the default token, scoped to what this job needs. It cannot touch master.

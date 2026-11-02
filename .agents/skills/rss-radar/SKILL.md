@@ -17,7 +17,7 @@ Feeds live in `feeds.json` (`{name, url, note}`) — add one there rather than e
 
 ## Growing the list
 
-This is the part that makes it a radar and not just a list: `.github/workflows/evolve-agents.yml` runs `discover.mjs` on sources used while researching a post, after that post merges, and adds a hit to `feeds.json` if it's worth tracking. The bar (same one applied by hand):
+This is the part that makes it a radar and not just a list: when `.github/workflows/evolve-agents.yml` is run by hand after a post merges, it runs `discover.mjs` on sources used while researching that post and adds a hit to `feeds.json` if it's worth tracking. The bar (same one applied by hand):
 
 - **A specific person or project's blog, not a one-off article.** A link to a single news story doesn't earn a feed; a writer or project whose other posts are also likely worth reading does.
 - **Actually has a feed.** `discover.mjs` checks the page's declared `<link rel="alternate">` tag first, then a handful of common paths (`/feed`, `/rss.xml`, `/atom.xml`, ...), and validates each candidate by parsing it rather than trusting a 200. Some sites block a plain `fetch()` outright (Cloudflare and similar; `thehackernews.com` is one — that's why it's in `feeds.json` by its Feedburner URL, found by hand, not by this script). No feed found there doesn't mean no feed exists, just that this tool couldn't confirm one.
