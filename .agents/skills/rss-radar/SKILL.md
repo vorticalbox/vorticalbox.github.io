@@ -36,4 +36,5 @@ Add an entry with a short, honest `note` — what it's good for, same as the exi
 
 - Same filter as `hn-radar`: a post-mortem with a mechanism beats an announcement. "128,000 records stolen" is not a post; how the attacker actually got in might be.
 - A feed item is a lead, not a source — read the linked article (and the vendor/researcher writeup it's based on, if named) before deciding it's worth writing about. Security reporting in particular tends to summarise a researcher's report thinly; find that report.
+- An RSS item has no HN id. Do not pass it to `hn.mjs load`. Read the article with `web-research`'s `read.mjs`, and use `hn.mjs search` when you want the comment thread.
 - Cross-check against `hn-radar search <term>` — if a story's already on HN, the comment thread may already hold the counter-argument or correction worth reading before committing to an angle.

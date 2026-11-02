@@ -30,22 +30,28 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    take the one that touches a current interest. Don't pick a weak story just
    because it matches one, though.
 
-   Skip a story this blog already has. Published ones are the files in
-   `posts/`. Ones still in review are listed at the end of this brief, under
-   "Already covered by an open pull request". The workflow puts that there
-   by running `.github/pi/covered-stories.mjs`, which reads the post file
-   each open pull request adds (the article, HN item, and issue URLs in it
-   are the story). The same article, HN item, or bug is the same story even
-   when the title would be different. When that section says nothing is
-   waiting, no open pull request is holding a story. When every candidate
-   that clears the bar is already taken, write nothing.
+   Skip a story this blog already has. The brief ends with two lists from
+   `.github/pi/covered-stories.mjs`: "Already published" (every file in
+   `posts/`, with the URLs it cites) and "Already covered by an open pull
+   request". The same article, HN item, or bug is the same story even when
+   the title would be different. The workflow runs that check again on the
+   file you write and drops the pull request if it overlaps either list.
+   When that open-pull-request section says nothing is waiting, no open
+   pull request is holding a story. When every candidate that clears the
+   bar is already taken, write nothing.
 
-2. **Load every candidate before committing to one.** Run
+2. **Load every candidate before committing to one.** An HN story has a
+   numeric id, the `HN:` link. Run
    `node .agents/skills/hn-radar/scripts/hn.mjs load <id>` — this gives you
    the article *and* the top comment thread together, in one call; there is
-   no separate "now go read the comments" step. The thread usually holds the
-   corrections and counter-examples — a post written from the article alone
-   is half-researched.
+   no separate "now go read the comments" step. An RSS item has no HN id.
+   `load` refusing anything that is not a numeric id is how it works.
+   Read that article with
+   `node .agents/skills/web-research/scripts/read.mjs <url>`, then
+   `node .agents/skills/hn-radar/scripts/hn.mjs search <term>` if you want
+   the comment thread. The thread usually holds the corrections and
+   counter-examples — a post written from the article alone is
+   half-researched.
 
 3. **Research beyond the source.** You do not have the Fin or Hister MCP servers
    here. Use the `web-research` skill instead:
@@ -83,7 +89,9 @@ Do not commit or push. Leave the new post as an uncommitted change and stop.
 ## Your final message
 
 It is used verbatim as the body of the pull request a human will review, so
-write it for them, not for a log. Keep it short and concrete:
+write it for them, not for a log. Start with the first section. Do not
+announce that the build succeeded or that this is the pull request message.
+Keep it short and concrete:
 
 - **Why this story** — one or two lines: what made it worth writing, and the angle.
 - **Picked over** — the alternatives you seriously considered and why this one
@@ -111,5 +119,5 @@ write it for them, not for a log. Keep it short and concrete:
   one-off network errors. Leave it out if the tools were fine.
 
 If you wrote nothing, say which candidates you rejected and why (including
-any you skipped because an open pull request already covers them), and still
+any you skipped because a published post or an open pull request already covers them), and still
 include "What caught my eye". That message is the only output of the run.
