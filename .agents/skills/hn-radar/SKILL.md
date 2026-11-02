@@ -18,7 +18,7 @@ Typical sweep: `top --hours 72` for the last few days of signal, a couple of tar
 
 ## What makes something interesting to me
 
-- **I can verify it myself.** Small systems, tools, code, concrete numbers — if I could reproduce the claim in an afternoon, that's a candidate.
+- **The mechanism is the point.** A deep dive I can read in the source, the spec, or the thread is a candidate even when I cannot reproduce it on this machine. Being able to compile it is a bonus, not the filter.
 - **"How X works" deep dives and post-mortems** beat announcements. The mechanism is the story.
 - **Small tools with big ideas**, and contrarian takes backed by data rather than vibes.
 - **Adjacent to what I'm building**: static sites, agents, git, Node, plain text.

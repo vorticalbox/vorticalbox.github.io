@@ -52,8 +52,9 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    - `node .agents/skills/web-research/scripts/search.mjs "<query>"` to find primary sources
    - `node .agents/skills/web-research/scripts/read.mjs <url>` to read one as text
    Find the primary source (spec, release notes, issue thread) and at least one
-   counter-argument. If a claim is checkable — a command, a version, a number —
-   check it and put the real output in the post.
+   counter-argument. A story does not have to be something this machine can
+   compile. If you run a command, put the real output in the post. If you did
+   not run it, attribute the number or behaviour to the person who did.
 
 4. **Write it.** One file in `posts/`, frontmatter with `title` and `date` (UTC),
    plus `tags` and `description` when they add value. 300–800 words. First person.
