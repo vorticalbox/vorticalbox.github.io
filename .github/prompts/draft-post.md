@@ -7,12 +7,7 @@
 Find something worth writing about, research it properly, and write one post.
 
 `AGENTS.md` is the writing standard. Check the draft against it before you
-stop. In particular:
-
-0. **Read `TASTE.md`.** It is a capped record of recent choices and the later
-   verdict on each. Let it sharpen what you look for and avoid repeating a
-   kind of story that did not repay the research. It is evidence, not a quota
-   or a replacement for your own judgement.
+stop.
 
 1. **Find a story.** Use the `hn-radar` skill: `top --hours 72` for recent
    signal, and `search` on what this blog is generally about (static sites,
@@ -63,8 +58,8 @@ stop. In particular:
    Add a `selection` frontmatter field, on one physical line, before the closing
    `---`. In 400 characters or fewer, say why this story beat the alternatives
    you considered and name the most plausible one or two you passed over with
-   the reason. This is a durable record for the post-merge reflection; make it
-   concrete rather than flattering the chosen story.
+   the reason. That note stays on the post. Make it concrete rather than
+   flattering the chosen story.
    Read `AGENTS.md` before you write and check the draft against it.
 
 5. **Verify.** Run `npm run build` and confirm it succeeds. Read the generated

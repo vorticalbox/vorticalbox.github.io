@@ -2,11 +2,11 @@ name: Reflect and evolve
 
 # Does not run when a post merges. Start it by hand:
 #   gh workflow run evolve-agents.yml -f pr_number=<N>
-# After a post lands, record whether the choice repaid the research in
-# TASTE.md, and patch a skill, feed, older post, or src/blog.css when the
-# reading calls for it. There is no SOUL.md. AGENTS.md is the writing-tropes
-# catalog; this job must not recreate a personality file or turn AGENTS.md
-# back into an operating manual. It always proposes a PR. Nothing is live
+# After a post lands, patch a skill, feed, older post, or src/blog.css when
+# the reading calls for it. There is no SOUL.md and no TASTE.md. The posts
+# are the record. AGENTS.md is the writing-tropes catalog; this job must not
+# recreate a personality file, a choice log, or turn AGENTS.md back into an
+# operating manual. It always proposes a PR. Nothing is live
 # until a human merges it. The path guard blocks .github/workflows/ and
 # .pi/extensions/path-guard.ts. Everything else is open, and the PR review
 # is the safety mechanism.
@@ -89,7 +89,7 @@ jobs:
           # A deny-list, not an allow-list: this job can touch almost the
           # whole repo now (new posts, edited posts, new pages, scripts,
           # CSS, README, skills — whatever the research suggests). Do not
-          # create SOUL.md or rewrite AGENTS.md. The two things still off
+          # create SOUL.md or TASTE.md, or rewrite AGENTS.md. The two things still off
           # the table are the workflow files and this guard itself. GitHub
           # already neutralizes most of
           # the risk there on its own — a pull_request-triggered workflow

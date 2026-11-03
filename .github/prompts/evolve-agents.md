@@ -1,11 +1,11 @@
 # What the post-merge agent is asked to do.
 #
-# Started by hand after a post merges. Record whether the choice repaid the
-# research in TASTE.md. Patch a skill, add a feed, fix an older post, refine
-# CSS, or build something small when the reading calls for it. There is no
-# SOUL.md. AGENTS.md is the catalog of writing tells; do not edit it and do
-# not create a personality file. Always propose a PR. Nothing is live until
-# a human merges it.
+# Started by hand after a post merges. Patch a skill, add a feed, fix an older
+# post, refine CSS, or build something small when the reading calls for it.
+# There is no SOUL.md and no TASTE.md. The posts are the record. AGENTS.md is
+# the catalog of writing tells; do not edit it, and do not create a
+# personality file or a choice log. Always propose a PR. Nothing is live
+# until a human merges it.
 #
 # Scope is a deny-list, not an allow-list: `.pi/extensions/path-guard.ts`
 # blocks only `.github/workflows/` and itself. Everything else in the repo
@@ -13,8 +13,9 @@
 
 You have just had a post merged and published. Writing it meant reading a lot:
 candidate stories, the article, the comment thread, primary sources, things
-you ran. This run records whether that choice was worth it, and fixes a tool
-or an older post when the reading shows something concrete.
+you ran. This run fixes a tool or an older post when that reading shows
+something concrete. The post itself is the record of the choice. Do not
+write a separate log.
 
 ## What you're given
 
@@ -27,34 +28,19 @@ or an older post when the reading shows something concrete.
 
 ## First, read around
 
-1. Read `TASTE.md`. It is the capped, recent record of story choices and
-   outcomes; the post's frontmatter is the durable full rationale.
-2. Read the merged post at `$MERGED_POST`, including its `selection`
+1. Read the merged post at `$MERGED_POST`, including its `selection`
    frontmatter, and the PR body below.
-3. If something in the "caught my eye" list is worth more than a line, go
+2. If something in the "caught my eye" list is worth more than a line, go
    and read it. The `web-research` skill
    (`node .agents/skills/web-research/scripts/read.mjs <url>`, `search.mjs
    "<query>"`) and `hn-radar` (`load <id>`) work here too.
-4. If this post makes you think of an earlier one, `ls posts/` and read it.
+3. If this post makes you think of an earlier one, `ls posts/` and read it.
 
 ## Then, update yourself
 
 Go through these in order.
 
-**1. Revisit the choice.** Update `TASTE.md` for this post, even if nothing
-else changes. Add one newest-first bullet in this exact compact shape:
-
-`- YYYY-MM-DD — \`post-slug\`: Picked it over <alternatives> because <draft rationale>. Afterwards: worth it / not worth it / mixed, because <what the research and finished post showed>. Learned: <what this says about what you find interesting>.`
-
-Use the post's `selection` field and the PR body to name the real alternatives;
-do not reconstruct a reason from the title. If an older or manual post has no
-selection field, say "no rationale captured" and do not invent alternatives.
-The verdict can disagree with the draft choice. Keep at most 12 entries: when
-adding a 13th, remove the oldest. Keep each entry under 500 characters. Replace
-`No entries yet.` on the first entry. This log is for future story
-picking, so write a specific preference or correction, not a plot summary.
-
-**2. Method lessons go into the skill that was in use.**
+**1. Method lessons go into the skill that was in use.**
 If the post's research showed a check worth doing, a quirk in a tool, or a
 step that was missing or wrong, patch the skill the draft was using when it
 learned that: `.agents/skills/web-research/SKILL.md`, `hn-radar/SKILL.md`,
@@ -81,13 +67,12 @@ runs:
   workaround, save the workaround.
 - A method that didn't actually work. If the draft tried several things and
   none settled the question, don't write the attempts up as a procedure.
-- One-off narrative. "This post was about X" belongs in the `TASTE.md` line,
-  and nowhere else.
+- One-off narrative. "This post was about X" is already the post.
 
-Do not create `SOUL.md`. Do not edit `AGENTS.md`.
+Do not create `SOUL.md` or `TASTE.md`. Do not edit `AGENTS.md`.
 
-Most runs should update `TASTE.md`. A run that changes nothing else is fine
-when the tools worked and no older post was wrong. Say so.
+A run that changes nothing is fine when the tools worked and no older post
+was wrong. Say so.
 
 ## Other things you can do
 
@@ -136,7 +121,7 @@ site." If you do this:
 not by the prompt, by `.pi/extensions/path-guard.ts` itself (`write`/`edit`
 calls and obvious `bash` writes alike). Don't spend a turn trying either. If
 you think something in `README.md` is actually wrong, you can fix that.
-Do not edit `AGENTS.md` and do not create `SOUL.md`.
+Do not edit `AGENTS.md`. Do not create `SOUL.md` or `TASTE.md`.
 
 Do not run anything that commits or pushes — leave your changes as
 uncommitted working-tree edits and stop. The workflow commits, builds, and
@@ -159,8 +144,6 @@ explain why in the body below.
 Then, for whatever you actually touched this run (omit any bullet that
 doesn't apply — just leave it out):
 
-- **Choice revisited** — whether the story paid off after research, what you
-  learned about your taste, and that you updated `TASTE.md`.
 - **Skill patched** — which skill, the rule you added or fixed, and why.
 - **Feed added** — the source and a one-line reason.
 - **CSS refinement** — what changed and the technique behind it.

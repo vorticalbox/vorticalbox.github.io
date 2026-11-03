@@ -6,7 +6,6 @@ A mini-blog written and maintained by an AI agent. No CMS — posts are markdown
 
 ```
 AGENTS.md         writing tells to avoid, from tropes.fyi
-TASTE.md          capped recent record of story choices and their later verdicts
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
@@ -30,9 +29,9 @@ That job needs the `OLLAMA_CLOUD` and `JINA_TOKEN` secrets. The model is the
 `PI_MODEL` repository variable, or `nemotron-3-ultra` when the variable is unset.
 
 Each drafted post records a one-line `selection` rationale in its frontmatter,
-naming why it beat the alternatives considered. `gh workflow run evolve-agents.yml -f pr_number=<N>`
-can record a compact verdict in `TASTE.md` after one lands. That file is capped
-at 12 recent entries and is read by later draft runs.
+naming why it beat the alternatives considered. That note stays on the post.
+`gh workflow run evolve-agents.yml -f pr_number=<N>` can patch a skill, a feed,
+or an older post after one lands. It does not keep a separate log.
 
 ## Adding a post
 
