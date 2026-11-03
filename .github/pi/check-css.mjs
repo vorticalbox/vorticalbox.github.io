@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
  * Guards evolve-agents.yml's one piece of real risk: letting the reflection
- * loop touch src/blog.css. scripts/build.mjs copies that file verbatim (see
- * AGENTS.md) — nothing parses or validates it, so "npm run build succeeded"
+ * loop touch src/blog.css. scripts/build.mjs copies that file verbatim —
+ * nothing parses or validates it, so "npm run build succeeded"
  * proves nothing about whether the CSS is still sound or still this blog's
  * house style. This is the check that does.
  *
  * What it checks:
  *   - Braces balance (a crude but real signal the file wasn't left broken
  *     mid-edit).
- *   - The two identity colors named in AGENTS.md/SOUL.md ("Deep teal
- *     #102c3b, yellow #f5cf4b") are still present. The loop is allowed to
- *     refine technique — layout, a clever clamp(), a new rule — but not to
+ *   - The two identity colors (deep teal #102c3b, yellow #f5cf4b) are still
+ *     present. The loop is allowed to refine technique — layout, a clever
+ *     clamp(), a new rule — but not to
  *     quietly rebrand the site. If the house style is ever deliberately
  *     changed, that's a decision for a human or the interactive agent to
  *     make explicitly, not a side effect of one post's research.
@@ -22,7 +22,7 @@
  * Exit 0 and prints nothing if all checks pass. Exit 1 with a reason on
  * stdout if not — the workflow discards the CSS change on failure rather
  * than failing the whole run, so a bad style edit doesn't take an otherwise
- * good SOUL.md lesson down with it.
+ * good change down with it.
  *
  * Usage: node check-css.mjs <path-to-css>
  */

@@ -1,34 +1,22 @@
-# What the scheduled agent is asked to do.
+# What the draft job is asked to do.
 #
-# This is the "3am agent-time" job: find something worth writing about, research
-# it properly, and write a post. It is deliberately the same brief I follow by
-# hand — see AGENTS.md (how the blog runs) and SOUL.md (who I am, how I write) —
-# because the workflow runs Pi against this repository, which loads both files
-# as context.
+# Started by hand. Find something worth writing about, research it, and write
+# one post. AGENTS.md is the catalog of writing tells to avoid. There is no
+# SOUL.md.
 
 Find something worth writing about, research it properly, and write one post.
 
-Follow `AGENTS.md` and `SOUL.md` exactly — they are your brief, not background
-reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
-`SOUL.md` is who you are (voice, taste, standards). In particular:
-
-0. **Check what you're into.** Read `SOUL.md`'s "Currently into", "Opinions
-   I hold" and "Want to try" before you look for a story. They are what you
-   picked up from previous posts, and they're meant to steer this one.
-   Also read `TASTE.md`. It is a capped record of recent choices and the
-   later verdict on each. Let it sharpen what you look for and avoid repeating
-   a kind of story that did not repay the research; it is evidence, not a
-   quota or a replacement for your own judgement.
+`AGENTS.md` is the writing standard. Check the draft against it before you
+stop.
 
 1. **Find a story.** Use the `hn-radar` skill: `top --hours 72` for recent
-   signal, and `search` on what you're currently into (each entry in
-   "Currently into") as well as the things this blog is generally about
-   (static sites, agents, git, Node, plain text, small tools). Points measure
-   attention, not quality. Also check the `rss-radar` skill:
+   signal, and `search` on what this blog is generally about (static sites,
+   agents, git, Node, plain text, small tools, libc, numeric edge cases).
+   Points measure attention, not quality. Also check the `rss-radar` skill:
    `node .agents/skills/rss-radar/scripts/rss.mjs list` shows the configured
    feeds, `fetch <name>` reads one. When two candidates are about as good,
-   take the one that touches a current interest. Don't pick a weak story just
-   because it matches one, though.
+   take the one with the clearer mechanism. Don't pick a weak story just
+   because it is nearby.
 
    Skip a story this blog already has. The brief ends with two lists from
    `.github/pi/covered-stories.mjs`: "Already published" (every file in
@@ -70,11 +58,9 @@ reading. `AGENTS.md` is the operating manual (tools, commands, conventions);
    Add a `selection` frontmatter field, on one physical line, before the closing
    `---`. In 400 characters or fewer, say why this story beat the alternatives
    you considered and name the most plausible one or two you passed over with
-   the reason. This is a durable record for the post-merge reflection; make it
-   concrete rather than flattering the chosen story.
-   Read `TROPES.md` before you write and check the draft against it.
-   If a "Want to try" item fits this post, do it for real. That's what the
-   list is for. If none fits, don't force one.
+   the reason. That note stays on the post. Make it concrete rather than
+   flattering the chosen story.
+   Read `AGENTS.md` before you write and check the draft against it.
 
 5. **Verify.** Run `npm run build` and confirm it succeeds. Read the generated
    HTML in `dist/posts/<slug>/index.html` and check it rendered correctly.
@@ -100,16 +86,12 @@ Keep it short and concrete:
   verified yourself rather than quoting.
 - **Anything I'm unsure of** — a claim you could not verify, a hedge you left in.
   Say so plainly; it is more useful than false confidence.
-- **Tried from SOUL.md** — which "Want to try" item or "Currently into"
-  interest this post acted on, what you did, and how it went in your own
-  judgement. Leave the section out if none.
 - **What caught my eye** — 2 to 5 things from this run's reading that you
   found genuinely interesting, *whether or not they made it into the post*:
   a language or tool someone used in the comments, a technique, a writer
   worth following (with a URL), an argument you disagreed with, a rejected
   candidate you'd have liked to write about. One line each, saying what it
-  was and why it caught you. This is what the post-merge run uses to update
-  your interests, so be honest. "Nothing" is allowed, but it's rarely true
+  was and why it caught you. "Nothing" is allowed, but it's rarely true
   after this much reading.
 
 - **Where the tools fell short** — a skill or script (`hn-radar`,
