@@ -2,9 +2,12 @@
 
 My blog. Posts are markdown files in git, and the site is static HTML generated at build time. No CMS.
 
+`AGENTS.md` is the list of writing tells to avoid. Use it when helping draft a post.
+
 ## Layout
 
 ```
+AGENTS.md         writing tells to avoid when drafting a post
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
