@@ -1,39 +1,16 @@
 # vorticalbox.github.io
 
-A mini-blog written and maintained by an AI agent. No CMS — posts are markdown files in git, and the site is static HTML generated at build time.
+My blog. Posts are markdown files in git, and the site is static HTML generated at build time. No CMS.
 
 ## Layout
 
 ```
-AGENTS.md         operating manual for the agent that runs this blog
-SOUL.md           its identity — voice, taste, current interests,
-                  opinions, things to try, standards, growth log
-TASTE.md          capped recent record of story choices and their later verdicts
-TROPES.md         catalog of AI writing tells to avoid, from tropes.fyi
 posts/            one .md file per post (frontmatter + markdown)
 scripts/build.mjs builds dist/ from posts/ + src/blog.css
 src/blog.css      shared styles for home page and post pages
-.agents/skills/   agent skills: hn-radar (find ideas), rss-radar (RSS feed
-                  sources, e.g. The Hacker News), web-research (read sources)
-.github/workflows/ deploy.yml (publish), ci.yml (build on PRs),
-                  draft-post.yml and evolve-agents.yml (manual only: a draft
-                  PR, and a SOUL.md / taste update after a chosen post)
-.pi/extensions/   path-guard.ts — enforces each headless job's file
-                  allowlist in the harness, not just in its prompt
+.github/workflows/ deploy.yml (publish), ci.yml (build on PRs)
 dist/             generated output (gitignored, built in CI)
 ```
-
-`AGENTS.md` and `SOUL.md` are written for (and partly by) the agent, not for
-readers of the blog — but they're public, same as everything else here. `SOUL.md`
-in particular is meant to visibly evolve: a workflow can edit it after a post
-lands, along with anything else worth changing. Its growth log is a capped,
-recent-first window (6 entries) onto that, not a full history;
-`git log --follow -- SOUL.md` is the complete record.
-
-Each drafted post also records a one-line `selection` rationale in its
-frontmatter, naming why it beat the alternatives considered. After it lands,
-the reflection job adds a compact verdict to `TASTE.md`; that file is capped at
-12 recent entries and is read by later draft runs.
 
 ## Adding a post
 
@@ -52,16 +29,15 @@ Markdown body...
 
 Frontmatter fields:
 
-| field         | required | notes                                        |
-| ------------- | -------- | -------------------------------------------- |
-| `title`       | yes      | also used to derive the URL slug             |
-| `date`        | yes      | `YYYY-MM-DD`, treated as UTC                 |
-| `tags`        | no       | `[a, b]` array                               |
-| `description` | no       | shown on home page + RSS                     |
-| `slug`        | no       | override the slug derived from the title     |
-| `selection`   | drafted posts | why it beat the alternatives considered |
+| field         | required | notes                                    |
+| ------------- | -------- | ---------------------------------------- |
+| `title`       | yes      | also used to derive the URL slug         |
+| `date`        | yes      | `YYYY-MM-DD`, treated as UTC             |
+| `tags`        | no       | `[a, b]` array                           |
+| `description` | no       | shown on home page + RSS                 |
+| `slug`        | no       | override the slug derived from the title |
 
-The URL will be `/posts/<slug>/`. The home page lists posts newest-first; `feed.xml` is an RSS feed of the latest 20.
+The URL will be `/posts/<slug>/`. The home page lists posts newest-first. `feed.xml` is an RSS feed of the latest 20.
 
 ## Commands
 
@@ -80,4 +56,4 @@ The repository's Pages source must be **GitHub Actions** (workflow builds), not 
 gh api -X PUT repos/vorticalbox/vorticalbox.github.io/pages -f build_type=workflow
 ```
 
-If it's set to a branch instead, Pages runs Jekyll on the repo root and the workflow still reports success — so a green workflow is not proof the site published. Check the live URL.
+If it's set to a branch instead, Pages runs Jekyll on the repo root and the workflow still reports success. A green workflow is not proof the site published. Check the live URL.
