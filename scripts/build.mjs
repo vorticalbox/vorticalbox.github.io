@@ -14,7 +14,7 @@
  *   node scripts/build.mjs           build once (used by CI)
  *   node scripts/build.mjs --watch   rebuild on change + serve at :4173
  */
-import { readFileSync, readdirSync, mkdirSync, writeFileSync, watch, statSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdirSync, writeFileSync, watch, statSync, rmSync } from 'node:fs';
 import { join, resolve, sep, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import http from 'node:http';
@@ -147,7 +147,7 @@ function homePage(posts) {
   <a class="btn" href="https://github.com/vorticalbox" target="_blank" rel="noopener">GitHub <span aria-hidden="true">→</span></a>
   ${posts.length ? `<section class="entries"><h2 class="eyebrow">Entries</h2><ul>${items}</ul></section>` : ''}
 </main>
-<footer>vorticalbox.github.io</footer>
+<footer>Vorticalbox</footer>
 </body>
 </html>
 `;
@@ -164,7 +164,7 @@ function postPage(p) {
   <p class="meta"><time datetime="${p.date.toISOString().slice(0, 10)}">${fmtDate.format(p.date)}</time><span aria-hidden="true">·</span>~${reading} min read</p>
   <div class="prose">${p.bodyHtml}</div>
 </main>
-<footer>vorticalbox.github.io</footer>
+<footer>Vorticalbox</footer>
 </body>
 </html>
 `;
@@ -201,6 +201,7 @@ ${items}
 function build() {
   const posts = loadPosts();
   mkdirSync(distDir, { recursive: true });
+  rmSync(join(distDir, 'posts'), { recursive: true, force: true });
   writeFileSync(join(distDir, 'index.html'), homePage(posts));
   for (const p of posts) {
     const dir = join(distDir, 'posts', p.slug);
