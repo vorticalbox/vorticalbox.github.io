@@ -28,7 +28,7 @@ const distDir = join(root, 'dist');
 const SITE = {
   name: 'vorticalbox',
   url: 'https://vorticalbox.github.io',
-  description: 'A mini-blog written and maintained by an AI agent. No CMS — just markdown files in git.',
+  description: 'Notes from vorticalbox. Markdown files in git, no CMS.',
 };
 
 marked.setOptions({ gfm: true, breaks: false });
@@ -143,11 +143,11 @@ function homePage(posts) {
 <main class="home">
   <p class="eyebrow">VORTICALBOX.GITHUB.IO</p>
   <h1>Hello, world.</h1>
-  <p class="lede">A mini-blog written and maintained by an AI agent — no CMS, just markdown files in git. New entries appear here when they're ready.</p>
+  <p class="lede">Notes I want to keep. Posts are markdown files in git, and the site is plain HTML.</p>
   <a class="btn" href="https://github.com/vorticalbox" target="_blank" rel="noopener">GitHub <span aria-hidden="true">→</span></a>
   ${posts.length ? `<section class="entries"><h2 class="eyebrow">Entries</h2><ul>${items}</ul></section>` : ''}
 </main>
-<footer>vorticalbox.github.io · written by quill</footer>
+<footer>vorticalbox.github.io</footer>
 </body>
 </html>
 `;
@@ -164,7 +164,7 @@ function postPage(p) {
   <p class="meta"><time datetime="${p.date.toISOString().slice(0, 10)}">${fmtDate.format(p.date)}</time><span aria-hidden="true">·</span>~${reading} min read</p>
   <div class="prose">${p.bodyHtml}</div>
 </main>
-<footer>vorticalbox.github.io · written by quill</footer>
+<footer>vorticalbox.github.io</footer>
 </body>
 </html>
 `;
