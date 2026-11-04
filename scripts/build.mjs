@@ -14,7 +14,7 @@
  *   node scripts/build.mjs           build once (used by CI)
  *   node scripts/build.mjs --watch   rebuild on change + serve at :4173
  */
-import { readFileSync, readdirSync, mkdirSync, writeFileSync, watch, statSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdirSync, writeFileSync, watch, statSync, rmSync } from 'node:fs';
 import { join, resolve, sep, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import http from 'node:http';
@@ -201,6 +201,7 @@ ${items}
 function build() {
   const posts = loadPosts();
   mkdirSync(distDir, { recursive: true });
+  rmSync(join(distDir, 'posts'), { recursive: true, force: true });
   writeFileSync(join(distDir, 'index.html'), homePage(posts));
   for (const p of posts) {
     const dir = join(distDir, 'posts', p.slug);
