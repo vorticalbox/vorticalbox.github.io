@@ -1,0 +1,4 @@
+interface:
+  display_name: "Check Repetition"
+  short_description: "Find repeated wording in blog posts"
+  default_prompt: "Use $check-repetition to find repeated words and phrases in this post."
